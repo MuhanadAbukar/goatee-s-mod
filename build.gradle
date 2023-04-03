@@ -13,20 +13,26 @@ buildscript {
             name = "jitpack"
             url = "https://jitpack.io"
         }
-        
+
     }
     dependencies {
-        classpath 'com.github.GTNewHorizons:ForgeGradle:1.2.11'
+        classpath('com.anatawa12.forge:ForgeGradle:1.2-1.0.+') {
+            changing = true
+        }
 
     }
 }
 
-apply plugin: "eclipse"
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
 apply plugin: 'forge'
 
 
 version = "1.7"
-group= "testmod" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "testmod" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "test"
 
 minecraft {
@@ -37,7 +43,6 @@ minecraft {
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
 
 
 dependencies {
@@ -55,94 +60,83 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
-
-
-
-def yourMixinConfig = 'goatutils.mixins.json'
-def refMapForYourConfig = 'goatutils.refmap.json'
-def relativePathToMixinAP = 'libs/mixin-0.8-SNAPSHOT.jar'
-
 repositories {
     maven {
-        name = "sponge"
-        url = "https://repo.spongepowered.org/maven/"
+        name = "jitpack"
+        url = "https://jitpack.io"
     }
-  
+
 }
 
+def mixinProviderGroup = "com.github.LegacyModdingMC.UniMixins"
+def mixinProviderModule = "_unimixins-all-1.7.10"
+def mixinProviderVersion = "0.1.6"
+def mixinProviderSpec = "${mixinProviderGroup}:${mixinProviderModule}:${mixinProviderVersion}:dev"
 
 dependencies {
-        compile('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
-            // Mixin includes a lot of dependencies that are too up-to-date
-            exclude module: 'launchwrapper'
-            exclude module: 'guava'
-            exclude module: 'gson'
-            exclude module: 'commons-io'
-            exclude module: 'log4j-core'
-        }
-}
-def refMap = "${tasks.compileJava.temporaryDir}" + File.separator + refMapForYourConfig
-
-def mixinSrg = "${tasks.reobf.temporaryDir}" + File.separator + "mixins.srg"
-
-
-afterEvaluate {
-    def fixedRelPathToAP = relativePathToMixinAP
-    if(fixedRelPathToAP.startsWith('./') || fixedRelPathToAP.startsWith('.\\')){
-        fixedRelPathToAP = fixedRelPathToAP.substring(2)
-    } else if(fixedRelPathToAP.startsWith('/') || fixedRelPathToAP.startsWith('\\')){
-        fixedRelPathToAP = fixedRelPathToAP.substring(1)
-    }
-
-    tasks.compileJava {
-        println "Path: " + projectDir.absolutePath
-        options.compilerArgs += [
-                // There's a bug in the AnnotationProcessor for 0.7.11 that will generate the annotations pointing to the parent class instead of subclass
-                // resulting in the mixin not being applied.  This is fixed in 0.8, however 0.8 needs guava > 21.0, and minecraft ships with 17.0.
-                // So as a hacky workaround... ship with 0.7.11, but use the AP from 0.8 for compiling
-                "-processorpath", projectDir.absolutePath + '/' + fixedRelPathToAP,
-                "-processor", "org.spongepowered.tools.obfuscation.MixinObfuscationProcessorInjection,org.spongepowered.tools.obfuscation.MixinObfuscationProcessorTargets",
-                "-Xlint:-sunapi", "-XDenableSunApiLintControl", "-XDignore.symbol.file",
-                "-AreobfSrgFile=${tasks.reobf.srg}", "-AoutSrgFile=${mixinSrg}", "-AoutRefMapFile=${refMap}"
-        ]
-    }
+    annotationProcessor(mixinProviderSpec)
+    implementation(mixinProviderSpec)
 }
 
-sourceSets {
-    main {
-        ext.refMap = refMapForYourConfig
-    }
-}
+def mixingConfigRefMap = 'mixins.' + project.modId + '.refmap.json'
+def mixinTmpDir = buildDir.path + File.separator + 'tmp' + File.separator + 'mixins'
+def refMap = "${mixinTmpDir}" + File.separator + mixingConfigRefMap
+def mixinSrg = "${mixinTmpDir}" + File.separator + "mixins.srg"
 
+tasks.named("compileJava", JavaCompile).configure {
+    doFirst {
+        new File(mixinTmpDir).mkdirs()
+    }
+    options.compilerArgs += ["-AreobfSrgFile=${tasks.reobf.srg}",
+                             "-AoutSrgFile=${mixinSrg}",
+                             "-AoutRefMapFile=${refMap}",
+                             // Elan: from what I understand they are just some linter configs so you get some warning on how to properly code
+                             "-XDenableSunApiLintControl",
+                             "-XDignore.symbol.file"]
+}
 
 jar {
-    manifest.attributes(
-            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
-            'MixinConfigs': yourMixinConfig,
-            'FMLCorePluginContainsFMLMod': 'true',
-    )
+    manifest.attributes('TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'MixinConfigs': "mixins." + project.modId + ".json",
+            'FMLCorePluginContainsFMLMod': 'true')
 }
 
 reobf {
     addExtraSrgFile mixinSrg
 }
 
-processResources
-        {
-            // this will ensure that this task is redone when the versions change.
-            inputs.property "version", project.version
-            inputs.property "mcversion", project.minecraft.version
+processResources {
+    setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
 
-            // replace stuff in mcmod.info, nothing else
-            from(sourceSets.main.resources.srcDirs) {
-                include 'mcmod.info'
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
 
-                // replace version and mcversion
-                expand 'version':project.version, 'mcversion':project.minecraft.version
-            }
+        // replace version and mcversion
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
 
-            // copy everything else, thats not the mcmod.info
-            from(sourceSets.main.resources.srcDirs) {
-                exclude 'mcmod.info'
-            }
-        }
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+def arguments = [
+        "--tweakClass org.spongepowered.asm.launch.MixinTweaker"
+]
+def jvmArguments = [
+            "-Dmixin.debug.verbose=true",
+            "-Dmixin.debug.export=true"
+]
+
+runClient {
+    args(arguments)
+}
+
+runServer {
+    args(arguments)
+}

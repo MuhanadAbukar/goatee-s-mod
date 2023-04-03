@@ -1,12 +1,12 @@
 {
   "required": true,
   "minVersion": "0.7.11",
-  "package": "com.goatee.tutorial.mixin",
-  "refmap": "goatutils.refmap.json",
+  "package": "com.goatee.tutorial.mixins",
+  "refmap": "mixins.dbcnpcutils.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
-  "mixins" : [
-	  "MixinIDBCPlayer",
+  "mixins": [
+    "MixinIDBCPlayer",
 	  "MixinScriptDBCPlayer"
-  ]
+	  ]
 }
