@@ -13,14 +13,17 @@ buildscript {
             name = "jitpack"
             url = "https://jitpack.io"
         }
+        
     }
     dependencies {
         classpath 'com.github.GTNewHorizons:ForgeGradle:1.2.11'
+
     }
 }
 
 apply plugin: "eclipse"
 apply plugin: 'forge'
+
 
 version = "1.7"
 group= "testmod" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -53,25 +56,7 @@ dependencies {
 }
 
 
-processResources
-        {
-            // this will ensure that this task is redone when the versions change.
-            inputs.property "version", project.version
-            inputs.property "mcversion", project.minecraft.version
 
-            // replace stuff in mcmod.info, nothing else
-            from(sourceSets.main.resources.srcDirs) {
-                include 'mcmod.info'
-
-                // replace version and mcversion
-                expand 'version':project.version, 'mcversion':project.minecraft.version
-            }
-
-            // copy everything else, thats not the mcmod.info
-            from(sourceSets.main.resources.srcDirs) {
-                exclude 'mcmod.info'
-            }
-        }
 
 def yourMixinConfig = 'goatutils.mixins.json'
 def refMapForYourConfig = 'goatutils.refmap.json'
@@ -82,12 +67,12 @@ repositories {
         name = "sponge"
         url = "https://repo.spongepowered.org/maven/"
     }
+  
 }
 
-apply plugin: 'org.spongepowered.mixin'
 
 dependencies {
-        implementation('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        compile('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
             // Mixin includes a lot of dependencies that are too up-to-date
             exclude module: 'launchwrapper'
             exclude module: 'guava'
@@ -100,9 +85,6 @@ def refMap = "${tasks.compileJava.temporaryDir}" + File.separator + refMapForYou
 
 def mixinSrg = "${tasks.reobf.temporaryDir}" + File.separator + "mixins.srg"
 
-reobf {
-    addExtraSrgFile mixinSrg
-}
 
 afterEvaluate {
     def fixedRelPathToAP = relativePathToMixinAP
@@ -133,5 +115,34 @@ sourceSets {
 }
 
 
+jar {
+    manifest.attributes(
+            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'MixinConfigs': yourMixinConfig,
+            'FMLCorePluginContainsFMLMod': 'true',
+    )
+}
 
+reobf {
+    addExtraSrgFile mixinSrg
+}
 
+processResources
+        {
+            // this will ensure that this task is redone when the versions change.
+            inputs.property "version", project.version
+            inputs.property "mcversion", project.minecraft.version
+
+            // replace stuff in mcmod.info, nothing else
+            from(sourceSets.main.resources.srcDirs) {
+                include 'mcmod.info'
+
+                // replace version and mcversion
+                expand 'version':project.version, 'mcversion':project.minecraft.version
+            }
+
+            // copy everything else, thats not the mcmod.info
+            from(sourceSets.main.resources.srcDirs) {
+                exclude 'mcmod.info'
+            }
+        }

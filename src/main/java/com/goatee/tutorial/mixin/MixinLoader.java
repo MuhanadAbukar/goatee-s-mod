@@ -2,6 +2,8 @@ package com.goatee.tutorial.mixin;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
 
@@ -9,8 +11,8 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 public class MixinLoader implements IFMLLoadingPlugin {
 	public MixinLoader() {
-	MixinBootstrap.init();
-	Mixins.addConfiguration("goatutils.mixins.json");
+		//MixinBootstrap.init();
+		//Mixins.addConfiguration("goatutils.mixins.json");
 	
 	}
 
@@ -25,7 +27,8 @@ public class MixinLoader implements IFMLLoadingPlugin {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
+	@Nullable
 	@Override
 	public String getSetupClass() {
 		// TODO Auto-generated method stub
