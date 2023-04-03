@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.7.11",
+  "package": "com.goatee.tutorial.mixin.mixins",
+  //"plugin": "noppes.npcs.mixin.CustomNPCsMixinPlugin",
+  "refmap": "goatutils .refmap.json",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8"
+  "mixins" : [
+	  "MixinIDBCPlayer",
+	  "MixinScriptDBCPlayer"
+  ]
+}

@@ -1,5 +1,6 @@
 package com.goatee.tutorial;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -15,6 +16,7 @@ public class TutorialJ {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
+    	FMLCommonHandler.instance().bus().register(new TestingEvent());
 
     }
     @Mod.EventHandler
@@ -23,6 +25,7 @@ public class TutorialJ {
     }
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event){
+    	
 
     }
 }
