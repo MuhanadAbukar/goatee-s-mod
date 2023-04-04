@@ -125,18 +125,3 @@ processResources {
     }
 }
 
-def arguments = [
-        "--tweakClass org.spongepowered.asm.launch.MixinTweaker"
-]
-def jvmArguments = [
-            "-Dmixin.debug.verbose=true",
-            "-Dmixin.debug.export=true"
-]
-
-runClient {
-    args(arguments)
-}
-
-runServer {
-    args(arguments)
-}
