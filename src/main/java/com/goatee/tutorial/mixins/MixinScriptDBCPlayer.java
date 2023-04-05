@@ -2,24 +2,28 @@ package com.goatee.tutorial.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import noppes.npcs.api.entity.IPlayer;
 import noppes.npcs.scripted.CustomNPCsException;
 import noppes.npcs.scripted.entity.ScriptDBCPlayer;
 import org.spongepowered.asm.mixin.Unique;
 
+import com.goatee.tutorial.packets.ServerPackets;
+import com.goatee.tutorial.proxy.CommonProxy;
+import com.goatee.tutorial.scripted.Player;
+import com.goatee.tutorial.scripted.Player.PlayerStats;
+
 import JinRyuu.DragonBC.common.DBCKiTech;
 import JinRyuu.JRMCore.JRMCoreH;
-import JinRyuu.JRMCore.JRMCoreKeyHandler;
 import JinRyuu.JRMCore.server.JGPlayerMP;
 
 @Mixin(ScriptDBCPlayer.class)
 public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
-	public T player;
-	public ScriptDBCPlayer<T> sdbc = (ScriptDBCPlayer<T>) ((Object) this);
+	@SuppressWarnings("unchecked")
+	public ScriptDBCPlayer<T> sdbc = (ScriptDBCPlayer<T>) ((Object) this); // works
+	public T player = sdbc.player;
+
 	// public NBTTagCompound nbt =
 	// player.getEntityData().getCompoundTag("PlayerPersisted");
 
@@ -28,22 +32,24 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		System.out.println(str);
 
 	}
+
 	@Unique
 	public boolean isFlying() {
-		return DBCKiTech.floating;
+
+		return PlayerStats.floating;
 	}
 
 	@Unique
 	public void setFlight(boolean bo) {
 		if (bo) {
-			if (!DBCKiTech.floating) {
-				KeyBinding k1 = JRMCoreKeyHandler.KiFlight;
-				KeyBinding.setKeyBindState(k1.getKeyCode(), bo);
-				// KeyBinding.unPressAllKeys();
+			if (!isFlying()) {
+				System.out.println("isfloating");
+				CommonProxy.network.sendTo(new ServerPackets(0), (EntityPlayerMP) player);
+
 			}
 		} else {
-			if (DBCKiTech.floating) {
-				DBCKiTech.floating = false;
+			if (isFlying()) {
+				CommonProxy.network.sendTo(new ServerPackets(1), (EntityPlayerMP) player);
 			}
 		}
 
@@ -71,8 +77,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		byte pwr = JRMCoreH.getByte(player, "jrmcPwrtyp");
 		byte rce = JRMCoreH.getByte(player, "jrmcRace");
 		byte cls = JRMCoreH.getByte(player, "jrmcClass");
-		int maxEnergy = JRMCoreH.stat(pwr, 5, PlyrAttrbts[5], rce, cls,
-				JRMCoreH.SklLvl_KiBs(player, pwr));
+		int maxEnergy = JRMCoreH.stat(pwr, 5, PlyrAttrbts[5], rce, cls, JRMCoreH.SklLvl_KiBs(player, pwr));
 
 		return maxEnergy;
 	}
@@ -99,8 +104,8 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		if (i == 1 || i == 2) {
 			JRMCoreH.Anim(i);
 		} else {
-			throw new CustomNPCsException("Invalid Animation ID : " + i
-					+ "\nValid IDs are: 1 for Flight \nand 2 for Standing",
+			throw new CustomNPCsException(
+					"Invalid Animation ID : " + i + "\nValid IDs are: 1 for Flight \nand 2 for Standing",
 					new Object[0]);
 		}
 	}
@@ -108,8 +113,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	@Unique
 	public int[] getAllStats() {
 		int[] stats = new int[6];
-		NBTTagCompound nbt = player.getEntityData()
-				.getCompoundTag("PlayerPersisted");
+		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		stats[0] = nbt.getInteger("jrmcStrI");
 		stats[1] = nbt.getInteger("jrmcDexI");
 		stats[2] = nbt.getInteger("jrmcCnsI");
@@ -124,8 +128,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	public int getFullStat(int statid) { // str 0, dex 1, con 2, wil 3, mnd 4,
 											// spi 5
 		JGPlayerMP JG = new JGPlayerMP(player);
-		NBTTagCompound nbt = player.getEntityData()
-				.getCompoundTag("PlayerPersisted");
+		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		JG.setNBT(nbt);
 		return JG.getAttribute(statid);
 	}
@@ -134,8 +137,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	public int[] getAllFullStats() {
 		int[] fullstats = new int[6];
 		JGPlayerMP JG = new JGPlayerMP(player);
-		NBTTagCompound nbt = player.getEntityData()
-				.getCompoundTag("PlayerPersisted");
+		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		JG.setNBT(nbt);
 		fullstats[0] = JG.getAttribute(0);
 		fullstats[1] = JG.getAttribute(1);
@@ -148,10 +150,19 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
+	public EntityPlayer getEntityPlayer() {
+		return (EntityPlayer) sdbc.player;
+	}
+
+	@Unique
+	public EntityPlayerMP getEntityPlayerMP() {
+		return (EntityPlayerMP) sdbc.player;
+	}
+
+	@Unique
 	public JGPlayerMP getJGPlayer() {
 		JGPlayerMP JG = new JGPlayerMP(player);
-		NBTTagCompound nbt = player.getEntityData()
-				.getCompoundTag("PlayerPersisted");
+		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		JG.setNBT(nbt);
 		return JG;
 	}
@@ -169,8 +180,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public String getFormName(int race, int form) {
-		CustomNPCsException c = new CustomNPCsException(
-				"Invalid \nform ID for race " + JRMCoreH.Races[race],
+		CustomNPCsException c = new CustomNPCsException("Invalid \nform ID for race " + JRMCoreH.Races[race],
 				new Object[0]);
 		CustomNPCsException r = new CustomNPCsException(
 				"Invalid Race : \nValid Races are \n0 Human, 1 Saiyan\n 2 Half-Saiyan, 3 Namekian\n4 Arcosian, 5 Majin",
@@ -181,29 +191,29 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				throw r;
 			} else {
 				switch (race) {
-					case 0 :
-					case 3 :
-						if (form > 3) {
-							throw c;
-						}
-						break;
-					case 1 :
-					case 2 :
-						if (form > 15) {
-							throw c;
-						}
-						break;
+				case 0:
+				case 3:
+					if (form > 3) {
+						throw c;
+					}
+					break;
+				case 1:
+				case 2:
+					if (form > 15) {
+						throw c;
+					}
+					break;
 
-					case 4 :
-						if (form > 7) {
-							throw c;
-						}
-						break;
-					case 5 :
-						if (form > 4) {
-							throw c;
-						}
-						break;
+				case 4:
+					if (form > 7) {
+						throw c;
+					}
+					break;
+				case 5:
+					if (form > 4) {
+						throw c;
+					}
+					break;
 				}
 			}
 
@@ -223,21 +233,11 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public EntityPlayer getEntityPlayer() {
-		return (EntityPlayer) sdbc.player;
-	}
-	@Unique
-	public EntityPlayerMP getEntityPlayerMP() {
-		return (EntityPlayerMP) sdbc.player;
-	}
-
-	@Unique
-	public void changeFormMastery(T player, String formName, double amount,
-			boolean add) {
-		player = sdbc.player;
+	public void changeFormMastery(T player, String formName, double amount, boolean add) {
+		ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>(player);
+		player = playerSDBC.player;
 		JGPlayerMP JG = new JGPlayerMP(player);
-		NBTTagCompound nbt = player.getEntityData()
-				.getCompoundTag("PlayerPersisted");
+		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		JG.setNBT(nbt);
 		int race = (int) JG.getRace();
 
@@ -252,23 +252,23 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		System.out.println("Form name is " + formName);
 
 		switch (formName.toLowerCase()) {
-			case "kaioken" :
-				found = true;
-				isKaiokenOn = true;
-				amountKK = amount;
-				break;
-			case "mystic" :
-				found = true;
-				isMysticOn = true;
+		case "kaioken":
+			found = true;
+			isKaiokenOn = true;
+			amountKK = amount;
+			break;
+		case "mystic":
+			found = true;
+			isMysticOn = true;
 
-			case "ultrainstict" :
-				found = true;
-				isUltraInstinctOn = true;
-				break;
-			case "godofdestruction" :
-				found = true;
-				isGoDOn = true;
-				break;
+		case "ultrainstict":
+			found = true;
+			isUltraInstinctOn = true;
+			break;
+		case "godofdestruction":
+			found = true;
+			isGoDOn = true;
+			break;
 
 		}
 		if (found) {
@@ -277,8 +277,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 			int foundatindex;
 			String newnonracial = "";
 			for (int i = 0; i < masteries.length; i++) {
-				if (masteries[i].toLowerCase()
-						.contains(formName.toLowerCase())) {
+				if (masteries[i].toLowerCase().contains(formName.toLowerCase())) {
 					foundatindex = i;
 					String[] masteryvalues = masteries[i].split(",");
 					double masteryvalue = Double.parseDouble(masteryvalues[1]);
@@ -290,26 +289,23 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 					System.out.println("masteryvalue is " + masteryvalue);
 					String newvalue = Double.toString(masteryvalue);
 					switch (foundatindex) {
-						case 0 :
-							newnonracial = masteryvalues[0] + "," + newvalue
-									+ ";" + masteries[1] + ";" + masteries[2]
-									+ ";" + masteries[3];
-							break;
-						case 1 :
-							newnonracial = masteries[0] + ";" + masteryvalues[0]
-									+ "," + newvalue + ";" + masteries[2] + ";"
-									+ masteries[3];
-							break;
-						case 2 :
-							newnonracial = masteries[0] + ";" + masteries[1]
-									+ ";" + masteryvalues[0] + "," + newvalue
-									+ ";" + masteries[3];;
-							break;
-						case 3 :
-							newnonracial = masteries[0] + ";" + masteries[1]
-									+ ";" + masteries[2] + ";"
-									+ masteryvalues[0] + "," + newvalue;
-							break;
+					case 0:
+						newnonracial = masteryvalues[0] + "," + newvalue + ";" + masteries[1] + ";" + masteries[2] + ";"
+								+ masteries[3];
+						break;
+					case 1:
+						newnonracial = masteries[0] + ";" + masteryvalues[0] + "," + newvalue + ";" + masteries[2] + ";"
+								+ masteries[3];
+						break;
+					case 2:
+						newnonracial = masteries[0] + ";" + masteries[1] + ";" + masteryvalues[0] + "," + newvalue + ";"
+								+ masteries[3];
+						;
+						break;
+					case 3:
+						newnonracial = masteries[0] + ";" + masteries[1] + ";" + masteries[2] + ";" + masteryvalues[0]
+								+ "," + newvalue;
+						break;
 					}
 					System.out.println("newnonracial is " + newnonracial);
 
@@ -324,9 +320,8 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				if (JRMCoreH.trans[race][i].equalsIgnoreCase(formName)) {
 					state = i;
 					found = true;
-					JRMCoreH.changeFormMasteriesValue(player, amount, amountKK,
-							add, race, state, state2, isKaiokenOn, isMysticOn,
-							isUltraInstinctOn, isGoDOn, -1);
+					JRMCoreH.changeFormMasteriesValue(player, amount, amountKK, add, race, state, state2, isKaiokenOn,
+							isMysticOn, isUltraInstinctOn, isGoDOn, -1);
 
 				}
 
@@ -340,13 +335,15 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		}
 
 	}
+
 	@Unique
 	public double getFormMastery(T player, String formName) {
 
-		player = sdbc.player;
+		ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>(player);
+		player = playerSDBC.player;
+
 		JGPlayerMP JG = new JGPlayerMP(player);
-		NBTTagCompound nbt = player.getEntityData()
-				.getCompoundTag("PlayerPersisted");
+		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		JG.setNBT(nbt);
 		int race = (int) JG.getRace();
 		boolean found = false;
@@ -354,34 +351,31 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		System.out.println("Form name is " + formName);
 
 		switch (formName.toLowerCase()) {
-			case "kaioken" :
-				found = true;
-				break;
-			case "mystic" :
-				found = true;
-			case "ultrainstict" :
-				found = true;
-				break;
-			case "godofdestruction" :
-				found = true;
-				break;
+		case "kaioken":
+			found = true;
+			break;
+		case "mystic":
+			found = true;
+		case "ultrainstict":
+			found = true;
+			break;
+		case "godofdestruction":
+			found = true;
+			break;
 
 		}
 		if (found) {
 			String nonracial = nbt.getString("jrmcFormMasteryNonRacial");
 			String masteries[] = nonracial.split(";");
 			for (int i = 0; i < masteries.length; i++) {
-				if (masteries[i].toLowerCase()
-						.contains(formName.toLowerCase())) {
+				if (masteries[i].toLowerCase().contains(formName.toLowerCase())) {
 					String[] masteryvalues = masteries[i].split(",");
 					double masteryvalue = Double.parseDouble(masteryvalues[1]);
 					System.out.println("Form name 2 is " + formName);
 
-
 					valuetoreturn = masteryvalue;
 					System.out.println("valuetoreturn is " + valuetoreturn);
 					break;
-
 
 				}
 			}
@@ -389,12 +383,10 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 		else if (!found) {
 
-			String racial = nbt
-					.getString("jrmcFormMasteryRacial_" + JRMCoreH.Races[race]);
+			String racial = nbt.getString("jrmcFormMasteryRacial_" + JRMCoreH.Races[race]);
 			String masteries[] = racial.split(";");
 			for (int i = 0; i < masteries.length; i++) {
-				if (masteries[i].toLowerCase()
-						.contains(formName.toLowerCase())) {
+				if (masteries[i].toLowerCase().contains(formName.toLowerCase())) {
 					String[] masteryvalues = masteries[i].split(",");
 					double masteryvalue = Double.parseDouble(masteryvalues[1]);
 					found = true;
@@ -413,9 +405,94 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 					new Object[2]);
 		}
 		if (valuetoreturn == -1.0) {
-			throw new CustomNPCsException("Form Mastery value is -1.0",
-					new Object[3]);
+			throw new CustomNPCsException("Form Mastery value is -1.0", new Object[3]);
 		}
 		return valuetoreturn;
 	}
+
+	@Unique
+	public void addFusionFormMasteries(T controller, T spectator, boolean multiplyaddedStats, double multiValue) {
+		double multi = multiValue;
+		if (multi == 0) {
+			multi = 1.0;
+		}
+		if (!multiplyaddedStats) {
+			multi = 1.0;
+		}
+		ScriptDBCPlayer<T> controllerSDBC = new ScriptDBCPlayer<T>(controller);
+		controller = controllerSDBC.player;
+		NBTTagCompound cnbt = controller.getEntityData().getCompoundTag("PlayerPersisted");
+		int crace = controllerSDBC.getRace();
+		String cracial = cnbt.getString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace]);
+		String cnonracial = cnbt.getString("jrmcFormMasteryNonRacial");
+
+		ScriptDBCPlayer<T> spectatorSDBC = new ScriptDBCPlayer<T>(spectator);
+		spectator = spectatorSDBC.player;
+		NBTTagCompound snbt = controller.getEntityData().getCompoundTag("PlayerPersisted");
+		int srace = spectatorSDBC.getRace();
+		String sracial = snbt.getString("jrmcFormMasteryRacial_" + JRMCoreH.Races[srace]);
+		String snonracial = snbt.getString("jrmcFormMasteryNonRacial");
+
+		boolean samerace = false;
+		if (crace == srace) {
+			samerace = true;
+		}
+		String[] cnonracialmasteries = cnonracial.split(";");
+		String[] snonracialmasteries = snonracial.split(";");
+		int lengthnr = cnonracialmasteries.length;
+
+		String[] cracialmasteries = cracial.split(";");
+		String[] sracialmasteries = sracial.split(";");
+		int lengthr = cracialmasteries.length;
+
+		String newmasteriesnr = "";
+		String newmasteriesr = "";
+
+		boolean done = false;
+		if (samerace) {
+			for (int i = 0; i < lengthnr; i++) {
+				String[] cmasteryvaluesnr = cnonracialmasteries[i].split(",");
+				String[] smasteryvaluesnr = snonracialmasteries[i].split(",");
+
+				// name , string( double(value1)+double(value2) ) ;
+				newmasteriesnr += cmasteryvaluesnr[0] + "," + Double.toString(
+						(Double.parseDouble(cmasteryvaluesnr[1]) + Double.parseDouble(smasteryvaluesnr[1])) * multi)
+						+ ";";
+
+			}
+			for (int i = 0; i < lengthr; i++) {
+				String[] cmasteryvaluesr = cracialmasteries[i].split(",");
+				String[] smasteryvaluesr = sracialmasteries[i].split(",");
+
+				newmasteriesr += cmasteryvaluesr[0] + "," + Double.toString(
+						(Double.parseDouble(cmasteryvaluesr[1]) + Double.parseDouble(smasteryvaluesr[1])) * multi)
+						+ ";";
+			}
+			done = true;
+		} else if (!samerace) {
+			multi = multiValue;
+			for (int i = 0; i < lengthnr; i++) {
+				String[] cmasteryvaluesnr = cnonracialmasteries[i].split(",");
+				newmasteriesnr += cmasteryvaluesnr[0] + ","
+						+ Double.toString(Double.parseDouble(cmasteryvaluesnr[1]) * multi) + ";";
+			}
+			for (int i = 0; i < lengthr; i++) {
+				String[] cmasteryvaluesr = cracialmasteries[i].split(",");
+
+				newmasteriesr += cmasteryvaluesr[0] + ","
+						+ Double.toString(Double.parseDouble(cmasteryvaluesr[1]) * multi) + ";";
+			}
+			done = true;
+		}
+		newmasteriesnr.substring(0, lengthnr - 2);
+		cnbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesnr);
+
+		newmasteriesr.substring(0, lengthr - 2);
+		cnbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesr);
+
+		if (!done) {
+			throw new CustomNPCsException("Invalid arguments", new Object[0]);
+		}
+	}
+
 }

@@ -15,28 +15,35 @@ import JinRyuu.JRMCore.JRMCoreH;
 public interface MixinIDBCPlayer extends IPlayer {
 	@Unique
 	public void exampleMethod(String str);
+	
+	
 	@Unique
 	public boolean isFlying();
+	
+	
 	@Unique
 	public void setFlight(boolean bo);
+	
 	@Unique
 	public boolean inAir();
+	
 
 	
 	
 	@Unique
-	public int getMaxBody();
+	public int getMaxBody(); //works
 	@Unique
-	public int getMaxEnergy();
+	public int getMaxEnergy(); //works
 	@Unique
-	public int getMaxStamina();
+	public int getMaxStamina(); //works
 
 	
 	
 	@Unique
-	public String StusEffectsMe();
+	public String StusEffectsMe(); //works
 	@Unique
-	public void changeDBCAnim(int i);
+	public void changeDBCAnim(int i); //works
+	
 
 	
 	
@@ -49,29 +56,30 @@ public interface MixinIDBCPlayer extends IPlayer {
 	
 	
 	
+	
 	@Unique
-	public EntityPlayer getEntityPlayer();
+	public EntityPlayerMP getEntityPlayerMP();//works
 	@Unique
-	public EntityPlayerMP getEntityPlayerMP();
+	public JGPlayerMP getJGPlayer(); //works
 	@Unique
-	public JGPlayerMP getJGPlayer();
-	@Unique
-	public JRMCoreH getJRMCoreH();
+	public JRMCoreH getJRMCoreH(); //works
 	
 	
 	
 	@Unique
-	public String getFormName(int race, int form);
+	public String getFormName(int race, int form); //works
 	@Unique
-	public String getCurrentFormName();
+	public String getCurrentFormName(); //works
 	@Unique
 	public void changeFormMastery(EntityPlayer player, String formName,
-			double amount, boolean add);
+			double amount, boolean add); //works
 	@Unique
 	public double getFormMastery(EntityPlayer player, String formName);
 	@Unique
-	public String getAllFormMasteries();
-
+	public String getAllFormMasteries(); //works
+	@Unique
+	public void addFusionFormMasteries(EntityPlayer controller, EntityPlayer spectator, boolean multiplyaddedStats, double multiValue);
+	
 	
 	
 }
