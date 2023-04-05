@@ -1,6 +1,9 @@
 package com.goatee.tutorial.scripted;
 
+import com.goatee.tutorial.packets.PacketRegistry;
+
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import noppes.npcs.scripted.entity.ScriptDBCPlayer;
 
 public class PlayerStats<T extends EntityPlayerMP> {
@@ -16,10 +19,6 @@ public class PlayerStats<T extends EntityPlayerMP> {
 	}
 	public void init() {
 
-	}
-
-	public boolean isFlying(boolean bo) {
-		return floating;
 	}
 
 }

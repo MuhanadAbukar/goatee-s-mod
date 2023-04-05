@@ -1,22 +1,18 @@
 package com.goatee.tutorial.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
+import com.goatee.tutorial.scripted.Player;
+import com.goatee.tutorial.scripted.PlayerStats;
+
+import JinRyuu.JRMCore.JRMCoreH;
+import JinRyuu.JRMCore.server.JGPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import noppes.npcs.scripted.CustomNPCsException;
 import noppes.npcs.scripted.entity.ScriptDBCPlayer;
-import org.spongepowered.asm.mixin.Unique;
-
-import com.goatee.tutorial.packets.ServerPackets;
-import com.goatee.tutorial.proxy.CommonProxy;
-import com.goatee.tutorial.scripted.Player;
-import com.goatee.tutorial.scripted.PlayerStats;
-
-import JinRyuu.DragonBC.common.DBCKiTech;
-import JinRyuu.JRMCore.JRMCoreH;
-import JinRyuu.JRMCore.server.JGPlayerMP;
 
 @Mixin(ScriptDBCPlayer.class)
 public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
@@ -44,12 +40,12 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		if (bo) {
 			if (!isFlying()) {
 				System.out.println("isfloating");
-				CommonProxy.network.sendTo(new ServerPackets(0), (EntityPlayerMP) player);
+//				CommonProxy.network.sendTo(new ServerPackets(0), (EntityPlayerMP) player);
 
 			}
 		} else {
 			if (isFlying()) {
-				CommonProxy.network.sendTo(new ServerPackets(1), (EntityPlayerMP) player);
+//				CommonProxy.network.sendTo(new ServerPackets(1), (EntityPlayerMP) player);
 			}
 		}
 
