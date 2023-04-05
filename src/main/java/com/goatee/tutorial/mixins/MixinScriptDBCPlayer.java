@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Unique;
 import com.goatee.tutorial.packets.ServerPackets;
 import com.goatee.tutorial.proxy.CommonProxy;
 import com.goatee.tutorial.scripted.Player;
-import com.goatee.tutorial.scripted.Player.PlayerStats;
+import com.goatee.tutorial.scripted.PlayerStats;
 
 import JinRyuu.DragonBC.common.DBCKiTech;
 import JinRyuu.JRMCore.JRMCoreH;
@@ -157,6 +157,11 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	@Unique
 	public EntityPlayerMP getEntityPlayerMP() {
 		return (EntityPlayerMP) sdbc.player;
+	}
+	
+	@Unique
+	public PlayerStats getPlayerStats() {
+		return Player.getAllPlayerStats().get(player.getUniqueID());
 	}
 
 	@Unique

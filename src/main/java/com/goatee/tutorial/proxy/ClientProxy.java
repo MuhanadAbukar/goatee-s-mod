@@ -1,7 +1,6 @@
 package com.goatee.tutorial.proxy;
 
 import com.goatee.tutorial.Events.ClientEvents;
-import com.goatee.tutorial.scripted.PlayerStats;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;

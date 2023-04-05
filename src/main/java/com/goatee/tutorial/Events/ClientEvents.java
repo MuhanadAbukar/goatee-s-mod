@@ -1,7 +1,6 @@
 package com.goatee.tutorial.Events;
 
-import com.goatee.tutorial.scripted.Player;
-import com.goatee.tutorial.scripted.Player.PlayerStats;
+import com.goatee.tutorial.scripted.PlayerStats;
 
 import JinRyuu.DragonBC.common.DBCKiTech;
 import JinRyuu.JRMCore.JRMCoreKeyHandler;
@@ -9,8 +8,8 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.PlayerTickEvent;
 
-public class ClientEvents {
 
+public class ClientEvents {
 	@SubscribeEvent
 	public void onKeyPress(InputEvent.KeyInputEvent e) {
 		if (JRMCoreKeyHandler.KiFlight.getIsKeyPressed()) {

@@ -2,7 +2,7 @@ package com.goatee.tutorial.packets;
 
 import com.goatee.tutorial.mixins.MixinScriptDBCPlayer;
 import com.goatee.tutorial.scripted.Player;
-import com.goatee.tutorial.scripted.Player.PlayerStats;
+import com.goatee.tutorial.scripted.PlayerStats;
 
 import JinRyuu.DragonBC.common.DBCKiTech;
 import JinRyuu.JRMCore.JRMCoreKeyHandler;
