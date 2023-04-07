@@ -1,16 +1,17 @@
 package com.goatee.tutorial.scripted;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 
 public class Player {
 
-	private static Map<UUID, PlayerStats> PlayerStats = new HashMap<UUID, PlayerStats>();
+	@SuppressWarnings("rawtypes")
+	private static WeakHashMap<UUID, PlayerStats> PlayerStats = new WeakHashMap<UUID, PlayerStats>();
 	
 	
-	public static Map<UUID, PlayerStats> getAllPlayerStats(){
+	@SuppressWarnings("rawtypes")
+	public static WeakHashMap<UUID, PlayerStats> getAllPlayerStats(){
 		return PlayerStats;
 	}
 

@@ -12,7 +12,7 @@ public class ClientProxy extends CommonProxy {
 	public void preInit(FMLPreInitializationEvent e) {
 		super.preInit(e);
 		FMLCommonHandler.instance().bus().register(new ClientEvents());
-
+		
 	}
 
 	public void init(FMLInitializationEvent e) {

@@ -1,25 +1,31 @@
 package com.goatee.tutorial.scripted;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import noppes.npcs.scripted.entity.ScriptDBCPlayer;
+import noppes.npcs.scripted.entity.ScriptPlayer;
 
+//stores any stat you want for whichever player. This is always the same for each player, instantiated on login. Recall using ScriptDBCPlayer.getPlayerStats()
 public class PlayerStats<T extends EntityPlayerMP> {
-	public EntityPlayerMP player;
-	@SuppressWarnings("unchecked")
-	ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>((T)player);
-	public static boolean floating;
-    
-	
+	@SuppressWarnings("rawtypes")
+	public ScriptPlayer player;
+	private boolean floating;
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public PlayerStats(EntityPlayerMP player) {
-		this.player = player;
+		this.player = new ScriptPlayer(player);
 		init();
 	}
-	public void init() {
+
+	public boolean isFlying() {
+		return floating;
+	}
+
+	public void setFlying(boolean bo) {
+		this.floating = bo;
 
 	}
 
-	public boolean isFlying(boolean bo) {
-		return floating;
+	public void init() {
+
 	}
 
 }

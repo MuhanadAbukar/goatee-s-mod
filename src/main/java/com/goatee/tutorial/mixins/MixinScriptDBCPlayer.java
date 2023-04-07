@@ -2,19 +2,16 @@ package com.goatee.tutorial.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import noppes.npcs.scripted.CustomNPCsException;
 import noppes.npcs.scripted.entity.ScriptDBCPlayer;
 import org.spongepowered.asm.mixin.Unique;
 
-import com.goatee.tutorial.packets.ServerPackets;
-import com.goatee.tutorial.proxy.CommonProxy;
+import com.goatee.tutorial.packets.PacketRegistry;
 import com.goatee.tutorial.scripted.Player;
 import com.goatee.tutorial.scripted.PlayerStats;
 
-import JinRyuu.DragonBC.common.DBCKiTech;
 import JinRyuu.JRMCore.JRMCoreH;
 import JinRyuu.JRMCore.server.JGPlayerMP;
 
@@ -22,7 +19,8 @@ import JinRyuu.JRMCore.server.JGPlayerMP;
 public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	@SuppressWarnings("unchecked")
 	public ScriptDBCPlayer<T> sdbc = (ScriptDBCPlayer<T>) ((Object) this); // works
-	public T player = sdbc.player;
+	public T player;
+	
 
 	// public NBTTagCompound nbt =
 	// player.getEntityData().getCompoundTag("PlayerPersisted");
@@ -33,31 +31,29 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	}
 
+	@SuppressWarnings("rawtypes")
+	public PlayerStats getPlayerStats() {
+		return Player.getAllPlayerStats().get(player.getUniqueID());
+	}
+
 	@Unique
 	public boolean isFlying() {
 
-		return PlayerStats.floating;
+		return getPlayerStats().isFlying();
 	}
 
 	@Unique
 	public void setFlight(boolean bo) {
 		if (bo) {
 			if (!isFlying()) {
-				System.out.println("isfloating");
-				CommonProxy.network.sendTo(new ServerPackets(0), (EntityPlayerMP) player);
-
+				PacketRegistry.tellClient(player, 0);
 			}
 		} else {
 			if (isFlying()) {
-				CommonProxy.network.sendTo(new ServerPackets(1), (EntityPlayerMP) player);
+				PacketRegistry.tellClient(player, 0);
 			}
 		}
 
-	}
-
-	@Unique
-	public boolean inAir() {
-		return !player.onGround;
 	}
 
 	@Unique
@@ -147,34 +143,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		fullstats[5] = nbt.getInteger("jrmcCncI");
 
 		return fullstats;
-	}
-
-	@Unique
-	public EntityPlayer getEntityPlayer() {
-		return (EntityPlayer) sdbc.player;
-	}
-
-	@Unique
-	public EntityPlayerMP getEntityPlayerMP() {
-		return (EntityPlayerMP) sdbc.player;
-	}
-	
-	@Unique
-	public PlayerStats getPlayerStats() {
-		return Player.getAllPlayerStats().get(player.getUniqueID());
-	}
-
-	@Unique
-	public JGPlayerMP getJGPlayer() {
-		JGPlayerMP JG = new JGPlayerMP(player);
-		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
-		JG.setNBT(nbt);
-		return JG;
-	}
-
-	@Unique
-	public JRMCoreH getJRMCoreH() {
-		return new JRMCoreH();
 	}
 
 	@Unique
@@ -342,7 +310,11 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public double getFormMastery(T player, String formName) {
+	public double getFormMasteryValue(String formName) {
+		return getFormMasteryValue(player,  formName);
+	}
+	@Unique
+	public double getFormMasteryValue(T player, String formName) {
 
 		ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>(player);
 		player = playerSDBC.player;
@@ -380,7 +352,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 					valuetoreturn = masteryvalue;
 					System.out.println("valuetoreturn is " + valuetoreturn);
-					break;
+					return valuetoreturn;
 
 				}
 			}
@@ -399,7 +371,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 					valuetoreturn = masteryvalue;
 					System.out.println("valuetoreturn2 is " + valuetoreturn);
-					break;
+					return valuetoreturn;
 				}
 			}
 
@@ -472,8 +444,9 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				newmasteriesr += cmasteryvaluesr[0] + "," + Double.toString(
 						(Double.parseDouble(cmasteryvaluesr[1]) + Double.parseDouble(smasteryvaluesr[1])) * multi)
 						+ ";";
+				done = true;
 			}
-			done = true;
+
 		} else if (!samerace) {
 			multi = multiValue;
 			for (int i = 0; i < lengthnr; i++) {
@@ -486,11 +459,12 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 				newmasteriesr += cmasteryvaluesr[0] + ","
 						+ Double.toString(Double.parseDouble(cmasteryvaluesr[1]) * multi) + ";";
+				done = true;
 			}
-			done = true;
+
 		}
 		newmasteriesnr.substring(0, lengthnr - 2);
-		cnbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesnr);
+		cnbt.setString("jrmcFormMasteryNonRacial", newmasteriesnr);
 
 		newmasteriesr.substring(0, lengthr - 2);
 		cnbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesr);
