@@ -1,26 +1,27 @@
 package com.goatee.tutorial.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import noppes.npcs.scripted.CustomNPCsException;
-import noppes.npcs.scripted.entity.ScriptDBCPlayer;
 import org.spongepowered.asm.mixin.Unique;
 
+import com.goatee.tutorial.extras.UIDodge;
 import com.goatee.tutorial.packets.PacketRegistry;
 import com.goatee.tutorial.scripted.Player;
 import com.goatee.tutorial.scripted.PlayerStats;
 
 import JinRyuu.JRMCore.JRMCoreH;
 import JinRyuu.JRMCore.server.JGPlayerMP;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import noppes.npcs.scripted.CustomNPCsException;
+import noppes.npcs.scripted.entity.ScriptDBCPlayer;
+import noppes.npcs.scripted.entity.ScriptPlayer;
 
 @Mixin(ScriptDBCPlayer.class)
 public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
+
 	@SuppressWarnings("unchecked")
-	public ScriptDBCPlayer<T> sdbc = (ScriptDBCPlayer<T>) ((Object) this); // works
-	public T player;
-	
+	public ScriptDBCPlayer<T> sdbc = ((ScriptDBCPlayer<T>) (Object) this); // works
+	public T player = sdbc.player;
 
 	// public NBTTagCompound nbt =
 	// player.getEntityData().getCompoundTag("PlayerPersisted");
@@ -31,8 +32,11 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	}
 
+	@Unique
 	@SuppressWarnings("rawtypes")
 	public PlayerStats getPlayerStats() {
+		System.out.println("uuid is");
+		System.out.println(player.getUniqueID());
 		return Player.getAllPlayerStats().get(player.getUniqueID());
 	}
 
@@ -44,9 +48,13 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public void setFlight(boolean bo) {
+		System.out.println("told client1");
+
 		if (bo) {
+			System.out.println("told client22");
 			if (!isFlying()) {
 				PacketRegistry.tellClient(player, 0);
+				System.out.println("told client2");
 			}
 		} else {
 			if (isFlying()) {
@@ -206,9 +214,10 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public void changeFormMastery(T player, String formName, double amount, boolean add) {
-		ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>(player);
-		player = playerSDBC.player;
+	public void changeFormMastery(ScriptPlayer<T> Player, String formName, double amount, boolean add) {
+		// ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>((T) player);
+		// player =playerSDBC.player;
+		T player = Player.player;
 		JGPlayerMP JG = new JGPlayerMP(player);
 		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		JG.setNBT(nbt);
@@ -311,13 +320,14 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public double getFormMasteryValue(String formName) {
-		return getFormMasteryValue(player,  formName);
+		return getFormMasteryValue(sdbc, formName);
 	}
-	@Unique
-	public double getFormMasteryValue(T player, String formName) {
 
-		ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>(player);
-		player = playerSDBC.player;
+	@Unique
+	public double getFormMasteryValue(ScriptPlayer<T> Player, String formName) {
+
+		// ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>(player);
+		T player = Player.player;
 
 		JGPlayerMP JG = new JGPlayerMP(player);
 		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
@@ -388,7 +398,8 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public void addFusionFormMasteries(T controller, T spectator, boolean multiplyaddedStats, double multiValue) {
+	public void addFusionFormMasteries(ScriptPlayer<T> Controller, ScriptPlayer<T> Spectator,
+			boolean multiplyaddedStats, double multiValue) {
 		double multi = multiValue;
 		if (multi == 0) {
 			multi = 1.0;
@@ -396,17 +407,17 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		if (!multiplyaddedStats) {
 			multi = 1.0;
 		}
-		ScriptDBCPlayer<T> controllerSDBC = new ScriptDBCPlayer<T>(controller);
-		controller = controllerSDBC.player;
+		// ScriptDBCPlayer<T> controllerSDBC = new ScriptDBCPlayer<T>(controller);
+		T controller = Controller.player;
 		NBTTagCompound cnbt = controller.getEntityData().getCompoundTag("PlayerPersisted");
-		int crace = controllerSDBC.getRace();
+		int crace = Controller.getDBCPlayer().getRace();
 		String cracial = cnbt.getString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace]);
 		String cnonracial = cnbt.getString("jrmcFormMasteryNonRacial");
 
-		ScriptDBCPlayer<T> spectatorSDBC = new ScriptDBCPlayer<T>(spectator);
-		spectator = spectatorSDBC.player;
-		NBTTagCompound snbt = controller.getEntityData().getCompoundTag("PlayerPersisted");
-		int srace = spectatorSDBC.getRace();
+		// ScriptDBCPlayer<T> spectatorSDBC = new ScriptDBCPlayer<T>(spectator);
+		T spectator = Spectator.player;
+		NBTTagCompound snbt = spectator.getEntityData().getCompoundTag("PlayerPersisted");
+		int srace = Spectator.getDBCPlayer().getRace();
 		String sracial = snbt.getString("jrmcFormMasteryRacial_" + JRMCoreH.Races[srace]);
 		String snonracial = snbt.getString("jrmcFormMasteryNonRacial");
 
@@ -472,6 +483,11 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		if (!done) {
 			throw new CustomNPCsException("Invalid arguments", new Object[0]);
 		}
+	}
+
+	@Unique
+	public void doUIDodge(byte chance) {
+		UIDodge.UltraInstinctDodge(player, (byte) 1, chance);
 	}
 
 }

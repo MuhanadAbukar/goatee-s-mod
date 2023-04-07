@@ -16,6 +16,8 @@ public class PlayerStats<T extends EntityPlayerMP> {
 	}
 
 	public boolean isFlying() {
+		System.out.println("isFlying");
+
 		return floating;
 	}
 

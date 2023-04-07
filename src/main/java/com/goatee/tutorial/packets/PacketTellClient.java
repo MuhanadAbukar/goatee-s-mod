@@ -21,6 +21,8 @@ public class PacketTellClient implements IMessageHandler<PacketTellClient.msg, I
 			KeyBinding k1 = JRMCoreKeyHandler.KiFlight;
 			if (DBCKiTech.floating == false) {
 				KeyBinding.setKeyBindState(k1.getKeyCode(), true);
+				System.out.println("client recieved");
+
 				PacketRegistry.tellServer(0);
 			}//disable DBC Flight
 			if (DBCKiTech.floating == true) {

@@ -4,12 +4,12 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import noppes.npcs.api.entity.IDBCPlayer;
 import noppes.npcs.api.entity.IPlayer;
+import noppes.npcs.scripted.entity.ScriptPlayer;
 
 import org.spongepowered.asm.mixin.Unique;
 
 import com.goatee.tutorial.scripted.PlayerStats;
 
-import net.minecraft.entity.player.EntityPlayer;
 
 @SuppressWarnings("rawtypes")
 @Mixin(IDBCPlayer.class)
@@ -41,6 +41,8 @@ public interface MixinIDBCPlayer extends IPlayer {
 	public String StusEffectsMe(); //works
 	@Unique
 	public void changeDBCAnim(int i); //works
+	@Unique
+	public void doUIDodge(byte chance);
 	
 
 	
@@ -55,20 +57,18 @@ public interface MixinIDBCPlayer extends IPlayer {
 	
 	
 	
-	//@Unique
-	//public String getFormName(int race, int form); //works
+	@Unique
+	public String getFormName(int race, int form); //works
 	@Unique
 	public String getCurrentFormName(); //works
 	@Unique
-	public void changeFormMastery(EntityPlayer player, String formName,
+	public void changeFormMastery(ScriptPlayer Player, String formName,
 			double amount, boolean add); //works
 	@Unique
-	public double getFormMasteryValue(EntityPlayer player, String formName);
+	public double getFormMasteryValue(ScriptPlayer Player, String formName);
 	@Unique
 	public String getAllFormMasteries(); //works
 	@Unique
-	public void addFusionFormMasteries(EntityPlayer controller, EntityPlayer spectator, boolean multiplyaddedStats, double multiValue);
-	
-	
+	public void addFusionFormMasteries(ScriptPlayer controller, ScriptPlayer spectator, boolean multiplyaddedStats, double multiValue); //adds ALL masteries of both players first, then if multiplyAddedStats is enabled, multiplies them by multivalue.
 	
 }

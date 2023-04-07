@@ -3,10 +3,13 @@ package com.goatee.tutorial.mixins;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
+
 import com.goatee.tutorial.scripted.Player;
 import com.goatee.tutorial.scripted.PlayerStats;
 
+import JinRyuu.JRMCore.JRMCoreEH;
 import JinRyuu.JRMCore.JRMCoreH;
+import JinRyuu.JRMCore.i.ExtendedPlayer;
 import JinRyuu.JRMCore.server.JGPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,7 +20,9 @@ import noppes.npcs.scripted.entity.ScriptPlayer;
 
 @Mixin(ScriptPlayer.class)
 public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
-	public T player;
+	@SuppressWarnings("unchecked")
+	public ScriptPlayer<T> p = ((ScriptPlayer<T>) (Object) this);
+	public T player = p.player;
 
 	@Unique
 	public boolean inAir() {
@@ -31,6 +36,16 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
+	public EntityPlayerMP getEntityPlayerMP() {
+		return player;
+	}
+
+	@Unique
+	public ExtendedPlayer getExtendedPlayer() {
+		return ExtendedPlayer.get(player);
+	}
+
+	@Unique
 	public JGPlayerMP getJGPlayer() {
 		JGPlayerMP JG = new JGPlayerMP(player);
 		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
@@ -40,17 +55,22 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public JRMCoreH getJRMCoreH() {
+	
 		return new JRMCoreH();
+	}
+	@Unique
+	public JRMCoreEH getJRMCoreEH() {
+		return new JRMCoreEH();
 	}
 
 	@Unique
 	public IPlayer<?> getPlayer(String playername) {
 		return NpcAPI.Instance().getPlayer(playername);
 	}
-	
+
 	@Unique
 	public void executeCommand(String command) {
 		NoppesUtilServer.runCommand(player.getEntityWorld(), "API at " + player.getCommandSenderName(), command);
-		
+
 	}
 }
