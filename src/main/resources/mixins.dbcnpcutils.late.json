@@ -1,12 +1,8 @@
 {
   "required": true,
   "minVersion": "0.7.11",
-  "verbose": true,
   "package": "com.goatee.tutorial.mixins",
   "refmap": "mixins.dbcnpcutils.refmap.json",
-  "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [],
-  "client": [],
-  "server": []
+  "target": "@env(DEFAULT)"
 }
