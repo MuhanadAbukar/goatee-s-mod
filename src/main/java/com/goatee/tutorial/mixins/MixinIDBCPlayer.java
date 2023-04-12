@@ -41,9 +41,6 @@ public interface MixinIDBCPlayer extends IPlayer {
 	public String StusEffectsMe(); //works
 	@Unique
 	public void changeDBCAnim(int i); //works
-	@Unique
-	public void doUIDodge(byte chance);
-	
 
 	
 	
@@ -53,7 +50,6 @@ public interface MixinIDBCPlayer extends IPlayer {
 	public int getFullStat(int statid); //a "full stat" is a stat that has all factors calculated, like transformations, kaioken, server attribute and race multipliers, UI, majin/legendary/divine SEs
 	@Unique
 	public int[] getAllFullStats(); //returns an array with all full stats
-	
 	
 	
 	
@@ -71,4 +67,8 @@ public interface MixinIDBCPlayer extends IPlayer {
 	@Unique
 	public void addFusionFormMasteries(ScriptPlayer controller, ScriptPlayer spectator, boolean multiplyaddedStats, double multiValue); //adds ALL masteries of both players first, then if multiplyAddedStats is enabled, multiplies them by multivalue.
 	
+	
+	
+	@Unique
+	public void doUIDodge(byte chance);
 }

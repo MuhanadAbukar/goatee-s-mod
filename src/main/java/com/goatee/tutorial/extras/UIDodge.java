@@ -52,18 +52,18 @@ public class UIDodge {
 				(float) JGConfigUltraInstinct.CONFIG_UI_DODGE_STAMINA_COST[targetState2]);
 	}
 
-	public  static float getUltraInstinctDodgeStaminaCost(EntityPlayer targetPlayer, byte targetState2) {
+	public static float getUltraInstinctDodgeStaminaCost(EntityPlayer targetPlayer, byte targetState2) {
 		return getUltraInstinctStaminaCost(targetPlayer, targetState2,
 				(float) JGConfigUltraInstinct.CONFIG_UI_COUNTER_STAMINA_COST[targetState2]);
 	}
 
-	public boolean hasUltraInstinctEnoughStaminaToDodge(EntityPlayer targetPlayer, byte targetState2) {
+	public static boolean hasUltraInstinctEnoughStaminaToDodge(EntityPlayer targetPlayer, byte targetState2) {
 		float currentStamina = (float) JRMCoreH.getInt(targetPlayer, "jrmcStamina");
 		float staminaCost = getUltraInstinctDodgeStaminaCost(targetPlayer, targetState2);
 		return staminaCost <= currentStamina;
 	}
 
-	public boolean UltraInstinctCounter(DamageSource source, EntityPlayer targetPlayer, byte targetState2) {
+	public static boolean UltraInstinctCounter(DamageSource source, EntityPlayer targetPlayer, byte targetState2) {
 		if (!source.getDamageType().equals("UICounter")) {
 			byte attackCurrent = JRMCoreH.getUltraInstinctCounterRate(targetPlayer, targetState2);
 			if (source.getEntity() != null && (new Random()).nextInt(100) < attackCurrent) {
@@ -84,7 +84,7 @@ public class UIDodge {
 		return dodge;
 	}
 
-	public boolean UltraInstinctDodge2(EntityPlayer targetPlayer, byte targetState2, byte attacker) {
+	public static boolean UltraInstinctDodge2(EntityPlayer targetPlayer, byte targetState2, byte attacker) {
 		byte dodgeRate = JRMCoreH.getUltraInstinctDodgeRate(targetPlayer, targetState2);
 		byte dodgeCurrent = (byte) getUILevelDodgeDivision(JGConfigUltraInstinct.CONFIG_UI_LEVELS, targetState2,
 				attacker, dodgeRate);
@@ -133,7 +133,7 @@ public class UIDodge {
 		}
 	}
 
-	protected void knockback(EntityLivingBase targetEntity, Entity attacker, int knockbackStrength) {
+	protected static void knockback(EntityLivingBase targetEntity, Entity attacker, int knockbackStrength) {
 		if (knockbackStrength > 0) {
 			float var25 = MathHelper
 					.sqrt_double(attacker.motionX * attacker.motionX + attacker.motionZ * attacker.motionZ);
@@ -146,7 +146,7 @@ public class UIDodge {
 
 	}
 
-	protected void damageEntity(EntityLivingBase targetEntity, DamageSource source, float amount) {
+	protected static void damageEntity(EntityLivingBase targetEntity, DamageSource source, float amount) {
 		if (!targetEntity.isEntityInvulnerable()) {
 			if (amount <= 0.0F) {
 				return;

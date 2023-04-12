@@ -8,6 +8,8 @@ public class PlayerStats<T extends EntityPlayerMP> {
 	@SuppressWarnings("rawtypes")
 	public ScriptPlayer player;
 	private boolean floating;
+	public boolean sprintDisabled = false;
+	public boolean movementDisabled = false;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public PlayerStats(EntityPlayerMP player) {
@@ -16,14 +18,16 @@ public class PlayerStats<T extends EntityPlayerMP> {
 	}
 
 	public boolean isFlying() {
-		System.out.println("isFlying");
-
 		return floating;
 	}
 
 	public void setFlying(boolean bo) {
 		this.floating = bo;
 
+	}
+
+	public void disableSprint(boolean bo) {
+		this.sprintDisabled = bo;
 	}
 
 	public void init() {

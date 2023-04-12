@@ -1,33 +1,47 @@
 package com.goatee.tutorial.Events;
 
+import com.goatee.tutorial.CombatMode.KeyHandler;
 import com.goatee.tutorial.packets.PacketRegistry;
 
 import JinRyuu.DragonBC.common.DBCKiTech;
 import JinRyuu.JRMCore.JRMCoreKeyHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent;
+import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.PlayerTickEvent;
-
-import java.util.UUID;
-import java.util.WeakHashMap;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 
 public class ClientEvents {
-	public static WeakHashMap<UUID, Boolean> isOnGroundTriggeredMap = new WeakHashMap<UUID, Boolean>();
+	@SideOnly(Side.CLIENT)
+	public static boolean isOnGroundTriggered = true;
+	@SideOnly(Side.CLIENT)
+	public static boolean isSprintDisabled = false;
+	@SideOnly(Side.CLIENT)
+	public static boolean isMovementDisabled = false;
+	public boolean idk = false;
+
+	// @SubscribeEvent
+	public void eventKey(PlayerTickEvent e) {
+
+		if (idk == false) {
+			System.out.println("s");
+
+			idk = KeyHandler.unbindPlayerKeys();
+		}
+
+	}
 
 	@SubscribeEvent
-	public void onKeyPress(InputEvent.KeyInputEvent e) {
-
-		if (JRMCoreKeyHandler.KiFlight.getIsKeyPressed() && JRMCoreKeyHandler.KiFlight.isPressed()) {
-			boolean floating = DBCKiTech.floating;
-			if (!floating) { // sends to server that player isFlying on flight keybind press.
-				PacketRegistry.tellServer(0);
-				System.out.println("tick - flight is pressed");
-
-			} else {
-				PacketRegistry.tellServer(1);
-			}
+	public void onKeyPress(KeyInputEvent e) {
+		if (Minecraft.getMinecraft().gameSettings.keyBindDrop.getIsKeyPressed()) {
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindDrop.getKeyCode(), false);
+			System.out.println("dropped");
 		}
+		handleFlightKeyInput(e);
+
 	}
 
 	/*
@@ -38,18 +52,56 @@ public class ClientEvents {
 	@SubscribeEvent
 	public void onTick(PlayerTickEvent e) {
 		if (e.phase.equals(Phase.START)) {
+
 			// checks if player is on ground once, then stops. This "once" resets once
 			// player is no longer on ground, then checks again after player lands. If on
 			// ground, disables DBC flight and tells server isFlying is false.
-			if (e.player.onGround && !isOnGroundTriggeredMap.get(e.player.getUniqueID()) && !DBCKiTech.floating) {
-				PacketRegistry.tellServer(1);
-				System.out.println("onGround");
-				DBCKiTech.floating = false;
-				ClientEvents.isOnGroundTriggeredMap.put(e.player.getUniqueID(), true);
+
+			handleFlightTick(e);
+
+		}
+	}
+
+	public void handleFlightKeyInput(KeyInputEvent e) {
+		if (JRMCoreKeyHandler.KiFlight.getIsKeyPressed() && JRMCoreKeyHandler.KiFlight.isPressed()) {
+			System.out.println("flight key code is " + JRMCoreKeyHandler.KiFlight.getKeyCode());
+			// sends to server that player isFlying on flight keybind press.
+			if (!DBCKiTech.floating) {
+				PacketRegistry.tellServer("1");
 			}
-			if (!e.player.onGround) {
-				ClientEvents.isOnGroundTriggeredMap.put(e.player.getUniqueID(), false);
+			if (DBCKiTech.floating) {
+				PacketRegistry.tellServer("2");
 			}
+
+		}
+	}
+
+	public void handleFlightTick(PlayerTickEvent e) {
+		if (e.player.onGround && !DBCKiTech.floating && !isOnGroundTriggered) {
+			isOnGroundTriggered = true;
+			PacketRegistry.tellServer("2");
+		}
+		if (!e.player.onGround) {
+			isOnGroundTriggered = false;
+		}
+	}
+
+	public void handleMovementDisabledTick(PlayerTickEvent e) {
+		if (isMovementDisabled) {
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindForward.getKeyCode(), false);
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindBack.getKeyCode(), false);
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindLeft.getKeyCode(), false);
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindRight.getKeyCode(), false);
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindJump.getKeyCode(), false);
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
+			e.player.setSprinting(false);
+		}
+	}
+
+	public void handleSprintDisabledTick(PlayerTickEvent e) {
+		if (isSprintDisabled) {
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
+			e.player.setSprinting(false);
 
 		}
 	}

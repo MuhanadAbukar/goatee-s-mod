@@ -5,7 +5,9 @@ import org.spongepowered.asm.mixin.Unique;
 
 import com.goatee.tutorial.scripted.PlayerStats;
 
+import JinRyuu.JRMCore.JRMCoreEH;
 import JinRyuu.JRMCore.JRMCoreH;
+import JinRyuu.JRMCore.i.ExtendedPlayer;
 import JinRyuu.JRMCore.server.JGPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import noppes.npcs.api.entity.IEntityLivingBase;
@@ -15,9 +17,6 @@ import noppes.npcs.api.entity.IPlayer;
 public interface MixinIPlayer<T extends EntityPlayerMP> extends IEntityLivingBase<T> {
 
 	@Unique
-	public JRMCoreH getJRMCoreH();
-
-	@Unique
 	public boolean inAir();
 
 	@SuppressWarnings("rawtypes")
@@ -25,8 +24,25 @@ public interface MixinIPlayer<T extends EntityPlayerMP> extends IEntityLivingBas
 	public PlayerStats getPlayerStats();
 
 	@Unique
+	public EntityPlayerMP getEntityPlayerMP();
+
+	@Unique
+	public JRMCoreH getJRMCoreH();
+
+	@Unique
 	public JGPlayerMP getJGPlayer();
 
 	@Unique
+	public JRMCoreEH getJRMCoreEH();
+
+	@Unique
+	public ExtendedPlayer getExtendedPlayer();
+
+	@Unique
 	public T getPlayer(String playername);
+
+	@Unique
+	public void executeCommand(String command);
+	
+	
 }

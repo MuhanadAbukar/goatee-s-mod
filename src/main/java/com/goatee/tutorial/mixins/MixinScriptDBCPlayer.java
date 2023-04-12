@@ -1,15 +1,17 @@
 package com.goatee.tutorial.mixins;
 
+import java.util.ArrayList;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 import com.goatee.tutorial.extras.UIDodge;
-import com.goatee.tutorial.packets.PacketRegistry;
 import com.goatee.tutorial.scripted.Player;
 import com.goatee.tutorial.scripted.PlayerStats;
 
 import JinRyuu.JRMCore.JRMCoreH;
 import JinRyuu.JRMCore.server.JGPlayerMP;
+import JinRyuu.JRMCore.server.config.dbc.JGConfigDBCFormMastery;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import noppes.npcs.scripted.CustomNPCsException;
@@ -23,8 +25,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	public ScriptDBCPlayer<T> sdbc = ((ScriptDBCPlayer<T>) (Object) this); // works
 	public T player = sdbc.player;
 
-	// public NBTTagCompound nbt =
-	// player.getEntityData().getCompoundTag("PlayerPersisted");
+	public NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 
 	@Unique
 	public void exampleMethod(String str) {
@@ -35,8 +36,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	@Unique
 	@SuppressWarnings("rawtypes")
 	public PlayerStats getPlayerStats() {
-		System.out.println("uuid is");
-		System.out.println(player.getUniqueID());
 		return Player.getAllPlayerStats().get(player.getUniqueID());
 	}
 
@@ -48,40 +47,32 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public void setFlight(boolean bo) {
-		System.out.println("told client1");
-
-		if (bo) {
-			System.out.println("told client22");
-			if (!isFlying()) {
-				PacketRegistry.tellClient(player, 0);
-				System.out.println("told client2");
-			}
-		} else {
-			if (isFlying()) {
-				PacketRegistry.tellClient(player, 0);
-			}
-		}
-
+		nbt.setBoolean("isFlying", bo);
 	}
 
 	@Unique
 	public int getMaxBody() {
 		int[] PlyrAttrbts = JRMCoreH.PlyrAttrbts(player);
+		JGPlayerMP JG = new JGPlayerMP(player);
+
+		JG.setNBT(nbt);
 		byte pwr = JRMCoreH.getByte(player, "jrmcPwrtyp");
 		byte rce = JRMCoreH.getByte(player, "jrmcRace");
 		byte cls = JRMCoreH.getByte(player, "jrmcClass");
-		int maxBody = JRMCoreH.stat(pwr, 2, PlyrAttrbts[2], rce, cls, 0.0F);
+		int maxBody = JG.getHealthMax(rce, cls, pwr, PlyrAttrbts);
 
 		return maxBody;
 	}
 
 	@Unique
-	public int getMaxEnergy() {
+	public int getMaxKi() {
 		int[] PlyrAttrbts = JRMCoreH.PlyrAttrbts(player);
+		JGPlayerMP JG = new JGPlayerMP(player);
+		JG.setNBT(nbt);
 		byte pwr = JRMCoreH.getByte(player, "jrmcPwrtyp");
 		byte rce = JRMCoreH.getByte(player, "jrmcRace");
 		byte cls = JRMCoreH.getByte(player, "jrmcClass");
-		int maxEnergy = JRMCoreH.stat(pwr, 5, PlyrAttrbts[5], rce, cls, JRMCoreH.SklLvl_KiBs(player, pwr));
+		int maxEnergy = JG.getEnergyMax(rce, cls, pwr, PlyrAttrbts, JRMCoreH.SklLvl_KiBs(player, pwr));
 
 		return maxEnergy;
 	}
@@ -89,12 +80,15 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	@Unique
 	public int getMaxStamina() {
 		int[] PlyrAttrbts = JRMCoreH.PlyrAttrbts(player);
+		JGPlayerMP JG = new JGPlayerMP(player);
+		JG.setNBT(nbt);
 		byte pwr = JRMCoreH.getByte(player, "jrmcPwrtyp");
 		byte rce = JRMCoreH.getByte(player, "jrmcRace");
 		byte cls = JRMCoreH.getByte(player, "jrmcClass");
-		int maxStam = JRMCoreH.stat(pwr, 3, PlyrAttrbts[2], rce, cls, 0.0F);
+		int maxStam = JG.getStaminaMax(rce, cls, pwr, PlyrAttrbts);
 
 		return maxStam;
+
 	}
 
 	@Unique
@@ -129,6 +123,78 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
+	public void addAllStats(int[] Stats, boolean multiplyaddedStats, double multiValue) {
+		if (Stats.length == 6) {
+			int[] stats = getAllStats();
+			double multi = multiValue;
+			if (multiValue == 0 || !multiplyaddedStats) {
+				multi = 1.0;
+			}
+
+			int[] newstats = new int[stats.length];
+			for (int i = 0; i < stats.length; i++) {
+				newstats[i] = (int) Math.floor((double) (stats[i] + Stats[i]) * multi);
+				nbt.setInteger(JRMCoreH.AttrbtNbtI[i], newstats[i]);
+
+			}
+			sdbc.setBody(getMaxBody());
+			sdbc.setKi(getMaxKi());
+			sdbc.setStamina(getMaxStamina());
+
+		}
+	}
+
+	@Unique
+	public void addAllStats(int Num, boolean setStatsToNum) {
+
+		int[] num = new int[] { Num, Num, Num, Num, Num, Num };
+		if (!setStatsToNum) {
+			addAllStats(num, false, 1);
+		} else {
+			for (int i = 0; i < num.length; i++) {
+				nbt.setInteger(JRMCoreH.AttrbtNbtI[i], num[i]);
+			}
+			sdbc.setBody(getMaxBody());
+			sdbc.setKi(getMaxKi());
+			sdbc.setStamina(getMaxStamina());
+		}
+
+	}
+
+	@Unique
+	public void addAllStats(int[] stats, boolean setStats) {
+		if (stats.length == 6) {
+			if (!setStats) {
+				addAllStats(stats, false, 1);
+			} else {
+				for (int i = 0; i < stats.length; i++) {
+					nbt.setInteger(JRMCoreH.AttrbtNbtI[i], stats[i]);
+				}
+				sdbc.setBody(getMaxBody());
+				sdbc.setKi(getMaxKi());
+				sdbc.setStamina(getMaxStamina());
+			}
+
+		}
+	}
+
+	@Unique
+	public void multiplyAllStats(double multi) {
+		int[] stats = getAllStats();
+		if (multi == 0) {
+			multi = 1.0;
+		}
+		int[] newstats = new int[stats.length];
+		for (int i = 0; i < stats.length; i++) {
+			newstats[i] = (int) Math.floor((double) stats[i] * multi);
+			nbt.setInteger(JRMCoreH.AttrbtNbtI[i], newstats[i]);
+		}
+		sdbc.setBody(getMaxBody());
+		sdbc.setKi(getMaxKi());
+		sdbc.setStamina(getMaxStamina());
+	}
+
+	@Unique
 	public int getFullStat(int statid) { // str 0, dex 1, con 2, wil 3, mnd 4,
 											// spi 5
 		JGPlayerMP JG = new JGPlayerMP(player);
@@ -154,12 +220,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public String getAllFormMasteries() {
-		return JRMCoreH.getFormMasteryData(player);
-
-	}
-
-	@Unique
 	public String getFormName(int race, int form) {
 		CustomNPCsException c = new CustomNPCsException("Invalid \nform ID for race " + JRMCoreH.Races[race],
 				new Object[0]);
@@ -180,7 +240,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 					break;
 				case 1:
 				case 2:
-					if (form > 15) {
+					if (form > 20) {
 						throw c;
 					}
 					break;
@@ -214,10 +274,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public void changeFormMastery(ScriptPlayer<T> Player, String formName, double amount, boolean add) {
-		// ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>((T) player);
-		// player =playerSDBC.player;
-		T player = Player.player;
+	public void changeFormMastery(String formName, double amount, boolean add) {
 		JGPlayerMP JG = new JGPlayerMP(player);
 		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 		JG.setNBT(nbt);
@@ -320,14 +377,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public double getFormMasteryValue(String formName) {
-		return getFormMasteryValue(sdbc, formName);
-	}
-
-	@Unique
-	public double getFormMasteryValue(ScriptPlayer<T> Player, String formName) {
-
-		// ScriptDBCPlayer<T> playerSDBC = new ScriptDBCPlayer<T>(player);
-		T player = Player.player;
 
 		JGPlayerMP JG = new JGPlayerMP(player);
 		NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
@@ -358,10 +407,8 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				if (masteries[i].toLowerCase().contains(formName.toLowerCase())) {
 					String[] masteryvalues = masteries[i].split(",");
 					double masteryvalue = Double.parseDouble(masteryvalues[1]);
-					System.out.println("Form name 2 is " + formName);
 
 					valuetoreturn = masteryvalue;
-					System.out.println("valuetoreturn is " + valuetoreturn);
 					return valuetoreturn;
 
 				}
@@ -377,10 +424,8 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 					String[] masteryvalues = masteries[i].split(",");
 					double masteryvalue = Double.parseDouble(masteryvalues[1]);
 					found = true;
-					System.out.println("masteryvalue is " + masteryvalue);
 
 					valuetoreturn = masteryvalue;
-					System.out.println("valuetoreturn2 is " + valuetoreturn);
 					return valuetoreturn;
 				}
 			}
@@ -398,15 +443,19 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
+	public String getAllFormMasteries() {
+		return JRMCoreH.getFormMasteryData(player);
+
+	}
+
+	@Unique
 	public void addFusionFormMasteries(ScriptPlayer<T> Controller, ScriptPlayer<T> Spectator,
 			boolean multiplyaddedStats, double multiValue) {
 		double multi = multiValue;
-		if (multi == 0) {
+		if (multiValue == 0 || !multiplyaddedStats) {
 			multi = 1.0;
 		}
-		if (!multiplyaddedStats) {
-			multi = 1.0;
-		}
+
 		// ScriptDBCPlayer<T> controllerSDBC = new ScriptDBCPlayer<T>(controller);
 		T controller = Controller.player;
 		NBTTagCompound cnbt = controller.getEntityData().getCompoundTag("PlayerPersisted");
@@ -459,6 +508,9 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 			}
 
 		} else if (!samerace) {
+			if (multiValue == 0) {
+				multiValue = 2.0;
+			}
 			multi = multiValue;
 			for (int i = 0; i < lengthnr; i++) {
 				String[] cmasteryvaluesnr = cnonracialmasteries[i].split(",");
@@ -488,6 +540,50 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	@Unique
 	public void doUIDodge(byte chance) {
 		UIDodge.UltraInstinctDodge(player, (byte) 1, chance);
+	}
+
+	@Unique
+	public String[] getAllFormMasteryData(int race, int formId) {
+		ArrayList<String> data = new ArrayList<>();
+		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_MAX_LEVEL, 0));
+		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_INSTANT_TRANSFORM_UNLOCK,
+				0));
+		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_REQUIRED_MASTERIES, 0));
+		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_AUTO_LEARN_ON_LEVEL, 0));
+		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_GAIN_TO_OTHER_MASTERIES,
+				0));
+
+		return data.toArray(new String[0]);
+
+	}
+
+	@Unique
+	public int getAllFormsLength(int race, boolean nonRacial) {
+		if (race < 0 || race > 5) {
+			throw new CustomNPCsException("Races are from 0 to 5", new Object[0]);
+		}
+		if (nonRacial) {
+			return JRMCoreH.transNonRacial.length;
+
+		}
+		return JRMCoreH.trans[race].length;
+	}
+
+	@Unique
+	public String[] getAllForms(int race, boolean nonRacial) {
+		if (race < 0 || race > 5) {
+			throw new CustomNPCsException("Races are from 0 to 5", new Object[0]);
+		}
+		if (nonRacial) {
+			return JRMCoreH.transNonRacial;
+
+		}
+		return JRMCoreH.trans[race];
+	}
+
+	@Unique
+	public boolean isSpectator() {
+		return JRMCoreH.isFusionSpectator(player);
 	}
 
 }
