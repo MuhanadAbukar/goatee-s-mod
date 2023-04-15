@@ -13,7 +13,7 @@ public class PacketTellServer implements IMessageHandler<PacketTellServer.msg, I
 	public IMessage onMessage(msg message, MessageContext ctx) {
 
 		String idString = message.idMsg;
-		System.out.println("At Server idMsg = " + message.idMsg);
+		//System.out.println("At Server idMsg = " + message.idMsg);
 
 		EntityPlayerMP p = ctx.getServerHandler().playerEntity;
 		NBTTagCompound nbt = p.getEntityData().getCompoundTag("PlayerPersisted");

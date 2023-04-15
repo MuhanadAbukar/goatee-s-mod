@@ -88,8 +88,8 @@ public interface MixinIDBCPlayer extends IPlayer {
 	/**adds ALL masteries of both players first, then 
 	if multiplyAddedStats is enabled, multiplies them by multivalue.*/
 	@Unique
-	public void addFusionFormMasteries(ScriptPlayer controller, ScriptPlayer spectator, boolean multiplyaddedStats, double multiValue); 
-	
+	public void addFusionFormMasteries(ScriptPlayer Controller, ScriptPlayer Spectator,
+			boolean multiplyaddedStats, double multiValue, boolean addForBoth);	
 	
 	
 	@Unique

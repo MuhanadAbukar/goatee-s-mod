@@ -225,6 +225,22 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
+	public String getRaceName(int race) {
+		if (race >= 0 && race <= 5) {
+			return JRMCoreH.Races[race];
+		}
+		return null;
+	}
+
+	@Unique
+	public String getRaceName() {
+		if (sdbc.getRace() >= 0 && sdbc.getRace() <= 5) {
+			return JRMCoreH.Races[sdbc.getRace()];
+		}
+		return null;
+	}
+
+	@Unique
 	public String getFormName(int race, int form) {
 		CustomNPCsException c = new CustomNPCsException("Invalid \nform ID for race " + JRMCoreH.Races[race],
 				new Object[0]);
@@ -233,7 +249,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				new Object[1]);
 		if (form >= 0) {
 			if (race > 5 || race < 0) {
-				System.out.println(race);
 				throw r;
 			} else {
 				switch (race) {
@@ -293,7 +308,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		int state = 0;
 		int state2 = 0;
 		double amountKK = 0;
-		System.out.println("Form name is " + formName);
 
 		switch (formName.toLowerCase()) {
 		case "kaioken":
@@ -330,7 +344,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 					} else {
 						masteryvalue = amount;
 					}
-					System.out.println("masteryvalue is " + masteryvalue);
 					String newvalue = Double.toString(masteryvalue);
 					switch (foundatindex) {
 					case 0:
@@ -351,7 +364,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 								+ "," + newvalue;
 						break;
 					}
-					System.out.println("newnonracial is " + newnonracial);
 
 					nbt.setString("jrmcFormMasteryNonRacial", newnonracial);
 					break;
@@ -389,7 +401,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		int race = (int) JG.getRace();
 		boolean found = false;
 		double valuetoreturn = -1.0;
-		System.out.println("Form name is " + formName);
 
 		switch (formName.toLowerCase()) {
 		case "kaioken":
@@ -453,7 +464,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public void addFusionFormMasteries(ScriptPlayer<T> Controller, ScriptPlayer<T> Spectator,
-			boolean multiplyaddedStats, double multiValue) {
+			boolean multiplyaddedStats, double multiValue, boolean addForBoth) {
 		double multi = multiValue;
 		if (multiValue == 0 || !multiplyaddedStats) {
 			multi = 1.0;
@@ -487,6 +498,8 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 		String newmasteriesnr = "";
 		String newmasteriesr = "";
+		String snewmasteriesnr = "";
+		String snewmasteriesr = "";
 
 		boolean done = false;
 		if (samerace) {
@@ -517,14 +530,22 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 			multi = multiValue;
 			for (int i = 0; i < lengthnr; i++) {
 				String[] cmasteryvaluesnr = cnonracialmasteries[i].split(",");
+				String[] smasteryvaluesnr = snonracialmasteries[i].split(",");
+
 				newmasteriesnr += cmasteryvaluesnr[0] + ","
 						+ Double.toString(Double.parseDouble(cmasteryvaluesnr[1]) * multi) + ";";
+				snewmasteriesnr += smasteryvaluesnr[0] + ","
+						+ Double.toString(Double.parseDouble(smasteryvaluesnr[1]) * multi) + ";";
 			}
 			for (int i = 0; i < lengthr; i++) {
 				String[] cmasteryvaluesr = cracialmasteries[i].split(",");
+				String[] smasteryvaluesr = snonracialmasteries[i].split(",");
 
 				newmasteriesr += cmasteryvaluesr[0] + ","
 						+ Double.toString(Double.parseDouble(cmasteryvaluesr[1]) * multi) + ";";
+
+				snewmasteriesr += smasteryvaluesr[0] + ","
+						+ Double.toString(Double.parseDouble(smasteryvaluesr[1]) * multi) + ";";
 				done = true;
 			}
 
@@ -534,6 +555,18 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 		newmasteriesr.substring(0, lengthr - 2);
 		cnbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesr);
+		if (addForBoth) {
+			snewmasteriesnr.substring(0, lengthr - 2);
+			snewmasteriesr.substring(0, lengthr - 2);
+			if (samerace) {
+				snbt.setString("jrmcFormMasteryNonRacial", newmasteriesnr);
+				snbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesr);
+			} else {
+				snbt.setString("jrmcFormMasteryNonRacial", snewmasteriesnr);
+				snbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[srace], snewmasteriesr);
+			}
+
+		}
 
 		if (!done) {
 			throw new CustomNPCsException("Invalid arguments", new Object[0]);

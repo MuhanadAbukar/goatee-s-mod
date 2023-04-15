@@ -19,7 +19,7 @@ public class PacketTellClient implements IMessageHandler<PacketTellClient.msg, I
 	public IMessage onMessage(msg message, MessageContext ctx) {
 
 		String idString = message.idMsg;
-		System.out.println("At Client idMsg = " + message.idMsg);
+		//System.out.println("At Client idMsg = " + message.idMsg);
 
 		// EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
 		// NBTTagCompound nbt = p.getEntityData().getCompoundTag("PlayerPersisted");
@@ -41,9 +41,9 @@ public class PacketTellClient implements IMessageHandler<PacketTellClient.msg, I
 					DBCKiTech.floating = false;
 				}
 			}
-			if(idString.equals("checkFlying")) {
-				if(!DBCKiTech.floating) {
-					PacketRegistry.tellServer("2");					
+			if (idString.equals("checkFlying")) {
+				if (!DBCKiTech.floating) {
+					PacketRegistry.tellServer("2");
 				}
 			}
 			if (idString.startsWith("isSprintDisabled:")) {
@@ -51,6 +51,13 @@ public class PacketTellClient implements IMessageHandler<PacketTellClient.msg, I
 					ClientEvents.isSprintDisabled = true;
 				} else {
 					ClientEvents.isSprintDisabled = false;
+				}
+			}
+			if (idString.startsWith("isMenuDisabled:")) {
+				if (value) {
+					ClientEvents.isMenuDisabled = true;
+				} else {
+					ClientEvents.isMenuDisabled = false;
 				}
 			}
 			if (idString.startsWith("isMovementDisabled:")) {

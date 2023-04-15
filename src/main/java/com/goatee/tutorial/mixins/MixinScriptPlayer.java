@@ -167,5 +167,8 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	public boolean inAir() {
 		return !player.onGround;
 	}
-
+	@Unique
+	public void disableMenu(boolean bo) {
+		nbt.setBoolean("isMenuDisabled", bo);
+	}
 }

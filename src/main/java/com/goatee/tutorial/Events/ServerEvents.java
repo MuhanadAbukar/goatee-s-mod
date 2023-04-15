@@ -26,6 +26,7 @@ public class ServerEvents {
 			handleMovementDisabled(nbt, e.player);
 			handleCombatMode(nbt, e.player);
 			handleIsBlind(nbt, e.player);
+			handleMenuDisabled(nbt, e.player);
 		}
 	}
 
@@ -48,21 +49,26 @@ public class ServerEvents {
 //				PacketRegistry.tellClient((EntityPlayerMP) p, "checkFlying");
 //			}
 
-		
 	}
 
 	public void handleSprinting(NBTTagCompound nbt, EntityPlayer p) {
-		if (nbt.getBoolean("lastSprintPacket") != p.getEntityData().getCompoundTag("PlayerPersisted")
-				.getBoolean("isSprintDisabled")) {
+		if (nbt.getBoolean("lastSprintPacket") != nbt.getBoolean("isSprintDisabled")) {
 			boolean isSprintDisabled = nbt.getBoolean("isSprintDisabled");
 			nbt.setBoolean("lastSprintPacket", isSprintDisabled);
 			PacketRegistry.tellClient((EntityPlayerMP) p, "isSprintDisabled:" + isSprintDisabled);
 		}
 	}
 
+	public void handleMenuDisabled(NBTTagCompound nbt, EntityPlayer p) {
+		if (nbt.getBoolean("lastMenuPacket") != nbt.getBoolean("isMenuDisabled")) {
+			boolean isMenuDisabled = nbt.getBoolean("isMenuDisabled");
+			nbt.setBoolean("lastMenuPacket", isMenuDisabled);
+			PacketRegistry.tellClient((EntityPlayerMP) p, "isMenuDisabled:" + isMenuDisabled);
+		}
+	}
+
 	public void handleMovementDisabled(NBTTagCompound nbt, EntityPlayer p) {
-		if (nbt.getBoolean("lastMDPacket") != p.getEntityData().getCompoundTag("PlayerPersisted")
-				.getBoolean("isMovementDisabled")) {
+		if (nbt.getBoolean("lastMDPacket") != nbt.getBoolean("isMovementDisabled")) {
 			boolean isMovementDisabled = nbt.getBoolean("isMovementDisabled");
 			nbt.setBoolean("lastMDPacket", isMovementDisabled);
 			PacketRegistry.tellClient((EntityPlayerMP) p, "isMovementDisabled:" + isMovementDisabled);
@@ -70,8 +76,7 @@ public class ServerEvents {
 	}
 
 	public void handleCombatMode(NBTTagCompound nbt, EntityPlayer p) {
-		if (nbt.getBoolean("lastCMPacket") != p.getEntityData().getCompoundTag("PlayerPersisted")
-				.getBoolean("CombatMode")) {
+		if (nbt.getBoolean("lastCMPacket") != nbt.getBoolean("CombatMode")) {
 			boolean CombatMode = nbt.getBoolean("CombatMode");
 			nbt.setBoolean("lastCMPacket", CombatMode);
 			PacketRegistry.tellClient((EntityPlayerMP) p, "CombatMode:" + CombatMode);
@@ -79,8 +84,7 @@ public class ServerEvents {
 	}
 
 	public void handleIsBlind(NBTTagCompound nbt, EntityPlayer p) {
-		if (nbt.getBoolean("lastIsBlindPacket") != p.getEntityData().getCompoundTag("PlayerPersisted")
-				.getBoolean("isBlind")) {
+		if (nbt.getBoolean("lastIsBlindPacket") != nbt.getBoolean("isBlind")) {
 			boolean isBlind = nbt.getBoolean("isBlind");
 			nbt.setBoolean("lastIsBlindPacket", isBlind);
 			PacketRegistry.tellClient((EntityPlayerMP) p, "isBlind:" + isBlind);
@@ -95,7 +99,7 @@ public class ServerEvents {
 		if (nbt.getInteger("jrmcStrI") >= 2) {
 			PlayerStats<?> ps = new PlayerStats<>(p);
 			Player.getAllPlayerStats().put(id, ps);
-			///ClientEvents.onGroundLT.put(id, p.onGround);
+			/// ClientEvents.onGroundLT.put(id, p.onGround);
 
 		}
 		initialiseNbts(nbt);
@@ -109,7 +113,7 @@ public class ServerEvents {
 		NBTTagCompound nbt = p.getEntityData().getCompoundTag("PlayerPersisted");
 		if (nbt.getInteger("jrmcStrI") >= 2) {
 			Player.getAllPlayerStats().remove(id);
-			//ClientEvents.onGroundLT.remove(id);
+			// ClientEvents.onGroundLT.remove(id);
 		}
 		removeTemps(nbt);
 
@@ -148,6 +152,9 @@ public class ServerEvents {
 		}
 		if (!nbt.hasKey("kiBlastsPassThrough")) {
 			nbt.setBoolean("kiBlastsPassThrough", false);
+		}
+		if (!nbt.hasKey("lastMenuPacket")) {
+			nbt.setBoolean("lastMenuPacket", false);
 		}
 
 	}

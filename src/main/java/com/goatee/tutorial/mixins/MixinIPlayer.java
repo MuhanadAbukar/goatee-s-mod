@@ -5,8 +5,6 @@ import org.spongepowered.asm.mixin.Unique;
 
 import com.goatee.tutorial.scripted.PlayerStats;
 
-import JinRyuu.JRMCore.JRMCoreEH;
-import JinRyuu.JRMCore.JRMCoreH;
 import JinRyuu.JRMCore.i.ExtendedPlayer;
 import JinRyuu.JRMCore.server.JGPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -50,5 +48,8 @@ public interface MixinIPlayer<T extends EntityPlayerMP> extends IEntityLivingBas
 
 	@Unique
 	public boolean inAir();
+
+	@Unique
+	public void disableMenu(boolean bo);
 
 }

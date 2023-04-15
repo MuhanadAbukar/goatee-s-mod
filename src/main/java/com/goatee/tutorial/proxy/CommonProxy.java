@@ -1,7 +1,6 @@
 package com.goatee.tutorial.proxy;
 
 import com.goatee.tutorial.Events.ServerEvents;
-import com.goatee.tutorial.Events.onGround;
 import com.goatee.tutorial.packets.PacketRegistry;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -14,7 +13,6 @@ public class CommonProxy {
 
 	public void preInit(FMLPreInitializationEvent e) {
 		FMLCommonHandler.instance().bus().register(new ServerEvents());
-		FMLCommonHandler.instance().bus().post(new onGround());
 		PacketRegistry.initPackets(e.getSide());
 
 	}

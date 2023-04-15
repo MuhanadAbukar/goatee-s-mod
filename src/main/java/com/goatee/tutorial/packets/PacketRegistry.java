@@ -1,6 +1,6 @@
 package com.goatee.tutorial.packets;
 
-import com.goatee.tutorial.ModVars;
+import com.goatee.tutorial.Main;
 
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -17,8 +17,8 @@ public class PacketRegistry {
 
 	public static void initPackets(Side side) {
 
-		tellS = NetworkRegistry.INSTANCE.newSimpleChannel(ModVars.ID + "tellS1");
-		tellC = NetworkRegistry.INSTANCE.newSimpleChannel(ModVars.ID + "tellC1");
+		tellS = NetworkRegistry.INSTANCE.newSimpleChannel(Main.ID + "tellS1");
+		tellC = NetworkRegistry.INSTANCE.newSimpleChannel(Main.ID + "tellC1");
 
 		if (side == Side.CLIENT) {
 			registerMessage(tellC, PacketTellClient.class, PacketTellClient.msg.class, 0, Side.CLIENT);

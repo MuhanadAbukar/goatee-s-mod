@@ -40,6 +40,8 @@ public class ClientEvents {
 	public static boolean isBlind = false;
 	@SideOnly(Side.CLIENT)
 	public static boolean loggedIn = false;
+	@SideOnly(Side.CLIENT)
+	public static boolean isMenuDisabled = false;
 
 	@SubscribeEvent
 	public void onKeyPress(KeyInputEvent e) {
@@ -102,6 +104,7 @@ public class ClientEvents {
 				handleFlightTick(e, p);
 				handleIsMovementDisabledTick(e, p);
 				handleIsSprintDisabledTick(e, p);
+				handleisMenuDisabled(e, p);
 			}
 		}
 	}
@@ -144,6 +147,12 @@ public class ClientEvents {
 		if (isSprintDisabled) {
 			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
 			p.setSprinting(false);
+		}
+	}
+
+	public void handleisMenuDisabled(PlayerTickEvent e, EntityClientPlayerMP p) {
+		if (isMenuDisabled) {
+			KeyBinding.setKeyBindState(JRMCoreKeyHandler.DS.getKeyCode(), false);
 		}
 	}
 
