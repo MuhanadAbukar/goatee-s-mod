@@ -34,6 +34,11 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
+	public void enableCombatMode(boolean bo) {
+		nbt.setBoolean("CombatMode", bo);
+	}
+
+	@Unique
 	@SuppressWarnings("rawtypes")
 	public PlayerStats getPlayerStats() {
 		return Player.getAllPlayerStats().get(player.getUniqueID());
@@ -47,7 +52,9 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public void setFlight(boolean bo) {
-		nbt.setBoolean("isFlying", bo);
+		if (sdbc.getRelease() > 0) {
+			nbt.setBoolean("isFlying", bo);
+		}
 	}
 
 	@Unique
@@ -140,7 +147,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 			sdbc.setBody(getMaxBody());
 			sdbc.setKi(getMaxKi());
 			sdbc.setStamina(getMaxStamina());
-
 		}
 	}
 
@@ -174,7 +180,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				sdbc.setKi(getMaxKi());
 				sdbc.setStamina(getMaxStamina());
 			}
-
 		}
 	}
 
@@ -429,7 +434,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 					return valuetoreturn;
 				}
 			}
-
 		}
 		if (!found) {
 			throw new CustomNPCsException(
@@ -445,7 +449,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	@Unique
 	public String getAllFormMasteries() {
 		return JRMCoreH.getFormMasteryData(player);
-
 	}
 
 	@Unique
@@ -564,7 +567,6 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		}
 		if (nonRacial) {
 			return JRMCoreH.transNonRacial.length;
-
 		}
 		return JRMCoreH.trans[race].length;
 	}
@@ -582,7 +584,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public boolean isSpectator() {
+	public boolean isDBCFusionSpectator() {
 		return JRMCoreH.isFusionSpectator(player);
 	}
 

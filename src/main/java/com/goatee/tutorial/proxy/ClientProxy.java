@@ -1,5 +1,6 @@
 package com.goatee.tutorial.proxy;
 
+import com.goatee.tutorial.CombatMode.KeyHandler;
 import com.goatee.tutorial.Events.ClientEvents;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -19,6 +20,7 @@ public class ClientProxy extends CommonProxy {
 
 	public void init(FMLInitializationEvent e) {
 		super.init(e);
+		KeyHandler.registerKeys();
 	}
 
 	public void postInit(FMLPostInitializationEvent e) {

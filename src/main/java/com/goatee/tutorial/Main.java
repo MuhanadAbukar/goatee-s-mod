@@ -18,18 +18,19 @@ public class Main {
     public static Main instance = new Main();
 
 	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		proxy.preInit(event);
+	public void preInit(FMLPreInitializationEvent e) {
+		proxy.preInit(e);
+		
 
 	}
 
 	@EventHandler
-	public void init(FMLInitializationEvent event) {
-
+	public void init(FMLInitializationEvent e) {
+		proxy.init(e);
 	}
 
 	@EventHandler
-	public void postInit(FMLPostInitializationEvent event) {
+	public void postInit(FMLPostInitializationEvent e) {
 
 	}
 }

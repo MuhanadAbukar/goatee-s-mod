@@ -1,87 +1,91 @@
 package com.goatee.tutorial.CombatMode;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 
 import org.lwjgl.input.Keyboard;
+
+import cpw.mods.fml.client.registry.ClientRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 
 public class KeyHandler {
+	public static KeyBinding CombatMode;
 
-	private static Field keybindArray = null;
-	@SuppressWarnings({ "unused", "rawtypes" })
-	private static List savedkeybindArray = new ArrayList<>();
-
-	public static ArrayList<Integer> mykeys;
-
+	public static KeyBinding[] keyBindings = Minecraft.getMinecraft().gameSettings.keyBindings;
 	public static int keyCode = Keyboard.getEventKey();
 
-	@SuppressWarnings("rawtypes")
-	public static void savePlayerKeybinds() {
+	public static ArrayList<Integer> mykeys;
+	public static ArrayList<Integer> numpadKeys;
+	public static ArrayList<Integer> otherkeys;
 
-		try {
-			keybindArray = KeyBinding.class.getDeclaredField("keybindArray");
-			keybindArray.setAccessible(true);
-			savedkeybindArray = (List) keybindArray.get(null);
+	public static HashMap<String, Integer> savedBinds;
+	public static ArrayList<KeyBinding> wasRemoved;
 
-		} catch (Exception e) {
-			e.printStackTrace();
+	public static void saveAllKeybinds() {
+		KeyBinding[] keyBindings = Minecraft.getMinecraft().gameSettings.keyBindings;
+		for (int i = 0; i < keyBindings.length; i++) {
+			savedBinds.put(keyBindings[i].getKeyDescription(), keyBindings[i].getKeyCode());
 		}
 
 	}
 
-	public static boolean unbindPlayerKeys() {
-		System.out.println("e");
-		try {
-			keybindArray = KeyBinding.class.getDeclaredField("keybindArray");
-			keybindArray.setAccessible(true);
-			int added = 0;
-			@SuppressWarnings("unchecked")
-			List<KeyBinding> x = (List<KeyBinding>) keybindArray.get(null);
-			for (KeyBinding bind : x) {
-				if (mykeys.contains(bind.getKeyCode())) {
-					System.out.println("Unbinded " + bind.getKeyCode() + " " + bind.getKeyDescription());
-					bind.setKeyCode(0);
-					added++;
-					if (added == mykeys.size()) {
-						KeyBinding.resetKeyBindingArrayAndHash();
-						return true;
-					}
-
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		if (Keyboard.isCreated() && Keyboard.getEventKeyState()) {
-
-			if (mykeys.contains(keyCode)) {
-				System.out.println(keyCode);
-
+	public static void unbindNonCombatKeys() {
+		for (KeyBinding bind : keyBindings) {
+			if (mykeys.contains(bind.getKeyCode())) {
+				//System.out.println("Unbinded " + bind.getKeyCode() + " " + bind.getKeyDescription());
+				bind.setKeyCode(0);
+				wasRemoved.add(bind);
+				unpressKey(bind);
+			//	System.out.println("saved code for " + bind.getKeyDescription() + " is "
+						//+ savedBinds.get(bind.getKeyDescription()));
 			}
 		}
-
-		return false;
+		KeyBinding.resetKeyBindingArrayAndHash();
+		
 	}
 
 	public static void reAddSavedKeys() {
-
-		try {
-			keybindArray = KeyBinding.class.getDeclaredField("keybindArray");
-			keybindArray.setAccessible(true);
-			keybindArray.set(null, savedkeybindArray);
+		if (!wasRemoved.isEmpty()) {
+			for (KeyBinding bind : wasRemoved) {
+				bind.setKeyCode(savedBinds.get(bind.getKeyDescription()));
+				//System.out.println("readded code " + bind.getKeyCode() + " for " + bind.getKeyDescription());
+			}
+			wasRemoved.clear();
+			savedBinds.clear();
 			KeyBinding.resetKeyBindingArrayAndHash();
+		}
 
+	}
+	
+	public static void unpressKey(KeyBinding bind) {
+		try {
+			Method unpressKey = KeyBinding.class.getDeclaredMethod("unpressKey");
+			unpressKey.setAccessible(true);
+			unpressKey.invoke(bind);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	public static void registerKeys() {
+		ClientRegistry.registerKeyBinding(CombatMode);
+	}
+
 	static {
-		mykeys = new ArrayList<>(Arrays.asList(16, 17, 18, 19));
+		numpadKeys = new ArrayList<>(Arrays.asList(70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83));
+		otherkeys = new ArrayList<>(Arrays.asList(15, 16, 43, 51, 52, 54, 157, 184));
+
+		mykeys = new ArrayList<>();
+		mykeys.addAll(numpadKeys);
+		mykeys.addAll(otherkeys);
+		savedBinds = new HashMap<String, Integer>();
+		wasRemoved = new ArrayList<>();
+
+		CombatMode = new KeyBinding("Toggle Combat Mode", 41, "JinRyuu's JRMCore");
+
 	}
 
 }
@@ -112,3 +116,23 @@ public class KeyHandler {
 //	{
 //		q.printStackTrace();
 //	}
+
+//try {
+//keybindArray = KeyBinding.class.getDeclaredField("keybindArray");
+//keybindArray.setAccessible(true);
+//savedkeybindArray = (List) keybindArray.get(null);
+//for (KeyBinding x : savedkeybindArray) {
+//	System.out.println(x.getKeyDescription());
+//
+//}
+//System.out.println("saved binds");
+//
+//} catch (Exception e) {
+//e.printStackTrace();
+//}
+
+//System.out.println("mc keybinds " + Minecraft.getMinecraft().gameSettings.keyBindings[i].getKeyDescription()
+//		+ " " + Minecraft.getMinecraft().gameSettings.keyBindings[i]);
+//System.out.println("mc keybinds " + keyBindings[i].getKeyDescription() + " " + keyBindings[i] + " clone");
+//System.out.println("array " + Minecraft.getMinecraft().gameSettings.keyBindings);
+//System.out.println("array " + keyBindings + " clone");

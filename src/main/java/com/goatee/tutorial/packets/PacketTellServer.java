@@ -13,50 +13,38 @@ public class PacketTellServer implements IMessageHandler<PacketTellServer.msg, I
 	public IMessage onMessage(msg message, MessageContext ctx) {
 
 		String idString = message.idMsg;
-		System.out.println("Tell Server idMsg = " + message.idMsg);
-
+		System.out.println("At Server idMsg = " + message.idMsg);
 
 		EntityPlayerMP p = ctx.getServerHandler().playerEntity;
 		NBTTagCompound nbt = p.getEntityData().getCompoundTag("PlayerPersisted");
 
-		if (idString.startsWith("lastFlyPacket:")) {
-			// Boolean value = Boolean.parseBoolean(idString.split(":")[1]);
-			// nbt.setBoolean("lastFlyPacket", value);
-		}
-
+		goThroughStringIDs(idString, nbt);
 		switch (idString) {
 		case "1":
-			if (!nbt.getBoolean("isFlying")) {
+			if (!nbt.getBoolean("isFlying") && nbt.getByte("jrmcRelease") > 0) {
 				nbt.setBoolean("isFlying", true);
 			}
-
 			break;
-		case "2":
+		case "2":			
 			if (nbt.getBoolean("isFlying")) {
 				nbt.setBoolean("isFlying", false);
-
-			}
-
-			break;
-		case "100":
-			if (!nbt.getBoolean("isSprintDisabled")) {
-				nbt.setBoolean("isSprintDisabled", true);
-			} else {
-				nbt.setBoolean("isSprintDisabled", false);
 			}
 			break;
-
-		case "101":
-			if (!nbt.getBoolean("isMovementDisabled")) {
-				nbt.setBoolean("isMovementDisabled", true);
-			} else {
-				nbt.setBoolean("isMovementDisabled", false);
-			}
-			break;
-
 		}
-
 		return null;
+	}
+
+	public void goThroughStringIDs(String idString, NBTTagCompound nbt) {
+		if (idString.contains(":")) {
+			Boolean value = Boolean.parseBoolean(idString.split(":")[1]);
+			if (idString.startsWith("CombatMode:")) {
+				if (value) {
+					nbt.setBoolean("CombatMode", true);
+				} else {
+					nbt.setBoolean("CombatMode", false);
+				}
+			}
+		}
 	}
 
 	public static class msg implements IMessage {

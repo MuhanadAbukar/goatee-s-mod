@@ -18,6 +18,8 @@ public interface MixinIDBCPlayer extends IPlayer {
 	public void exampleMethod(String str);
 	@Unique
 	public PlayerStats getPlayerStats();
+	@Unique
+	public void enableCombatMode(boolean bo);
 	
 	
 	
@@ -47,9 +49,22 @@ public interface MixinIDBCPlayer extends IPlayer {
 	@Unique
 	public int[] getAllStats();
 	@Unique
+	public void addAllStats(int[] Stats, boolean multiplyaddedStats, double multiValue);
+	@Unique
+	public void addAllStats(int Num, boolean setStatsToNum);
+	@Unique
+	public void addAllStats(int[] stats, boolean setStats);
+	@Unique
+	public void multiplyAllStats(double multi);
+	@Unique
 	public int getFullStat(int statid); //a "full stat" is a stat that has all factors calculated, like transformations, kaioken, server attribute and race multipliers, UI, majin/legendary/divine SEs
 	@Unique
 	public int[] getAllFullStats(); //returns an array with all full stats
+
+	
+	
+	
+	
 	
 	
 	
@@ -58,6 +73,9 @@ public interface MixinIDBCPlayer extends IPlayer {
 	@Unique
 	public String getCurrentFormName(); //works
 	@Unique
+	public String[] getAllForms(int race, boolean nonRacial);
+	public int getAllFormsLength(int race, boolean nonRacial);
+	@Unique
 	public void changeFormMastery(ScriptPlayer Player, String formName,
 			double amount, boolean add); //works
 	@Unique
@@ -65,10 +83,18 @@ public interface MixinIDBCPlayer extends IPlayer {
 	@Unique
 	public String getAllFormMasteries(); //works
 	@Unique
-	public void addFusionFormMasteries(ScriptPlayer controller, ScriptPlayer spectator, boolean multiplyaddedStats, double multiValue); //adds ALL masteries of both players first, then if multiplyAddedStats is enabled, multiplies them by multivalue.
+	public String[] getAllFormMasteryData(int race, int formId);
+	
+	/**adds ALL masteries of both players first, then 
+	if multiplyAddedStats is enabled, multiplies them by multivalue.*/
+	@Unique
+	public void addFusionFormMasteries(ScriptPlayer controller, ScriptPlayer spectator, boolean multiplyaddedStats, double multiValue); 
 	
 	
 	
 	@Unique
 	public void doUIDodge(byte chance);
+	@Unique
+	public boolean isDBCFusionSpectator();
+	
 }

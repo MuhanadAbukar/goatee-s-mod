@@ -1,17 +1,13 @@
 package com.goatee.tutorial.mixins;
 
-import java.lang.reflect.Field;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 import com.goatee.tutorial.scripted.Player;
 import com.goatee.tutorial.scripted.PlayerStats;
 
-import JinRyuu.JRMCore.JRMCoreEH;
-import JinRyuu.JRMCore.JRMCoreH;
 import JinRyuu.JRMCore.i.ExtendedPlayer;
 import JinRyuu.JRMCore.server.JGPlayerMP;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -29,8 +25,63 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	NBTTagCompound nbt = player.getEntityData().getCompoundTag("PlayerPersisted");
 
 	@Unique
-	public boolean inAir() {
-		return !player.onGround;
+	public void setStr(String key, String value) {
+		nbt.setString(key, value);
+	}
+
+	@Unique
+	public void setByte(String key, byte value) {
+		nbt.setByte(key, value);
+	}
+
+	@Unique
+	public void setBo(String key, boolean value) {
+		nbt.setBoolean(key, value);
+	}
+
+	@Unique
+	public void setInt(String key, int value) {
+		nbt.setInteger(key, value);
+	}
+
+	@Unique
+	public void setFloat(String key, float value) {
+		nbt.setFloat(key, value);
+	}
+
+	@Unique
+	public void setDouble(String key, double value) {
+		nbt.setDouble(key, value);
+	}
+
+	@Unique
+	public String getStr(String key) {
+		return nbt.getString(key);
+	}
+
+	@Unique
+	public byte getByte(String key) {
+		return nbt.getByte(key);
+	}
+
+	@Unique
+	public boolean getBo(String key) {
+		return nbt.getBoolean(key);
+	}
+
+	@Unique
+	public int getInt(String key) {
+		return nbt.getInteger(key);
+	}
+
+	@Unique
+	public float getFloat(String key) {
+		return nbt.getFloat(key);
+	}
+
+	@Unique
+	public double getDouble(String key) {
+		return nbt.getDouble(key);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -45,21 +96,10 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public JRMCoreH getJRMCoreH() {
-
-		return new JRMCoreH();
-	}
-
-	@Unique
 	public JGPlayerMP getJGPlayer() {
 		JGPlayerMP JG = new JGPlayerMP(player);
 		JG.setNBT(nbt);
 		return JG;
-	}
-
-	@Unique
-	public JRMCoreEH getJRMCoreEH() {
-		return new JRMCoreEH();
 	}
 
 	@Unique
@@ -75,7 +115,6 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	@Unique
 	public void executeCommand(String command) {
 		NoppesUtilServer.runCommand(player.getEntityWorld(), "API at " + player.getCommandSenderName(), command);
-
 	}
 
 	@Unique
@@ -112,26 +151,21 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	@Unique
 	public void disableSprinting(boolean bo) {
 		nbt.setBoolean("isSprintDisabled", bo);
-
 	}
 
 	@Unique
 	public void disableMovement(boolean bo) {
 		nbt.setBoolean("isMovementDisabled", bo);
-		
 	}
 
 	@Unique
-	public void stuff() {
-		// Field campo = KeyBinding.class.getDeclaredField("keybindArray");
-		// campo.setAccessible(true);
-		Field[] bindfields = KeyBinding.class.getDeclaredFields();
-		for (Field field : bindfields) {
-			System.out.println(field.getName());
-		}
-
-		// return KeyBinding.getKeybinds();
-		// return
-
+	public void setBlind(boolean bo) {
+		nbt.setBoolean("isBlind", bo);
 	}
+
+	@Unique
+	public boolean inAir() {
+		return !player.onGround;
+	}
+
 }
