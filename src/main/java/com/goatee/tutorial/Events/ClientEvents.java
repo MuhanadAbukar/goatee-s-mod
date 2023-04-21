@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.lwjgl.opengl.GL11;
 
+import com.goatee.tutorial.options;
+import com.goatee.tutorial.CombatMode.GUIKeyBindings;
 import com.goatee.tutorial.CombatMode.KeyHandler;
 import com.goatee.tutorial.packets.PacketRegistry;
 
@@ -27,6 +29,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent.FogDensity;
 
+@SideOnly(Side.CLIENT)
 public class ClientEvents {
 	@SideOnly(Side.CLIENT)
 	public static HashMap<UUID, Boolean> onGroundLT = new HashMap<UUID, Boolean>();
@@ -42,6 +45,15 @@ public class ClientEvents {
 	public static boolean loggedIn = false;
 	@SideOnly(Side.CLIENT)
 	public static boolean isMenuDisabled = false;
+	@SideOnly(Side.CLIENT)
+	public static boolean closeScreen;
+	@SideOnly(Side.CLIENT)
+	public static boolean isFlightGravityDisabled;
+	@SideOnly(Side.CLIENT)
+	Minecraft mc = Minecraft.getMinecraft();
+
+	@SideOnly(Side.CLIENT)
+	// EntityClientPlayerMP p = mc.thePlayer;
 
 	@SubscribeEvent
 	public void onKeyPress(KeyInputEvent e) {
@@ -49,6 +61,16 @@ public class ClientEvents {
 			EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
 			handleFlightKey(e, p);
 			handleCombatModeKey(e, p);
+			openCMGui(e, p);
+			if (isCombatModeEnabled) {
+				handleIT(e, p);
+			}
+		}
+	}
+
+	private void openCMGui(KeyInputEvent e, EntityClientPlayerMP p) {
+		if (KeyHandler.CMGui.getIsKeyPressed()) {
+			mc.displayGuiScreen(new GUIKeyBindings());
 		}
 	}
 
@@ -63,18 +85,26 @@ public class ClientEvents {
 		}
 	}
 
+	public void handleIT(KeyInputEvent e, EntityClientPlayerMP p) {
+		if (KeyHandler.InstantTransmission.getIsKeyPressed()) {
+			p.addChatMessage(new ChatComponentText("§a§lInstant Transmission!"));
+		}
+	}
+
 	public void handleCombatModeKey(KeyInputEvent e, EntityClientPlayerMP p) {
 		if (KeyHandler.CombatMode.getIsKeyPressed() && !isCombatModeEnabled) {
 			KeyHandler.saveAllKeybinds();
-			KeyHandler.unbindNonCombatKeys();
-			ClientEvents.isCombatModeEnabled = true;
+			KeyHandler.bindCombatKeys();
+			isCombatModeEnabled = true;
 			PacketRegistry.tellServer("CombatMode:" + true);
 			p.addChatMessage(new ChatComponentText("§lCombat Mode has been enabled!"));
 		} else if (KeyHandler.CombatMode.getIsKeyPressed() && isCombatModeEnabled) {
+			KeyHandler.unbindCombatKeys();
 			KeyHandler.reAddSavedKeys();
-			ClientEvents.isCombatModeEnabled = false;
+			isCombatModeEnabled = false;
 			PacketRegistry.tellServer("CombatMode:" + false);
 			p.addChatMessage(new ChatComponentText("§lCombat Mode has been disabled!"));
+			// Runtime.getRuntime().addShutdownHook();
 		}
 	}
 
@@ -82,14 +112,19 @@ public class ClientEvents {
 	public void onLogOut(ClientDisconnectionFromServerEvent e) {
 		EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
 		handleCombatModeDisconnect(e);
-		ClientEvents.onGroundLT.remove(p.getUniqueID());
+		options.saveOptions();
+		onGroundLT.remove(p.getUniqueID());
+		closeScreen = false;
 		loggedIn = false;
+		Runtime r = Runtime.getRuntime();
+		r.addShutdownHook(new ShutDownHookThread());
 	}
 
 	public void handleCombatModeDisconnect(ClientDisconnectionFromServerEvent e) {
 		if (isCombatModeEnabled) {
+			KeyHandler.unbindCombatKeys();
 			KeyHandler.reAddSavedKeys();
-			ClientEvents.isCombatModeEnabled = false;
+			isCombatModeEnabled = false;
 			PacketRegistry.tellServer("CombatMode:" + false);
 
 		}
@@ -98,8 +133,8 @@ public class ClientEvents {
 	@SubscribeEvent
 	public void onTick(PlayerTickEvent e) {
 		if (e.phase.equals(Phase.START)) {
-			if (Minecraft.getMinecraft().thePlayer != null) {
-				EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
+			EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
+			if (p != null) {
 				handleLogin(e, p);
 				handleFlightTick(e, p);
 				handleIsMovementDisabledTick(e, p);
@@ -130,13 +165,13 @@ public class ClientEvents {
 
 	public void handleIsMovementDisabledTick(PlayerTickEvent e, EntityClientPlayerMP p) {
 		if (isMovementDisabled) {
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindForward.getKeyCode(), false);
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindBack.getKeyCode(), false);
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindLeft.getKeyCode(), false);
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindRight.getKeyCode(), false);
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindJump.getKeyCode(), false);
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSneak.getKeyCode(), false);
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindJump.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), false);
 			KeyBinding.setKeyBindState(JRMCoreKeyHandler.KiFlight.getKeyCode(), false);
 
 			p.setSprinting(false);
@@ -145,14 +180,19 @@ public class ClientEvents {
 
 	public void handleIsSprintDisabledTick(PlayerTickEvent e, EntityClientPlayerMP p) {
 		if (isSprintDisabled) {
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), false);
 			p.setSprinting(false);
 		}
+
 	}
 
 	public void handleisMenuDisabled(PlayerTickEvent e, EntityClientPlayerMP p) {
 		if (isMenuDisabled) {
 			KeyBinding.setKeyBindState(JRMCoreKeyHandler.DS.getKeyCode(), false);
+			if (!closeScreen) {
+				p.closeScreen();
+				closeScreen = true;
+			}
 		}
 	}
 
@@ -174,4 +214,12 @@ public class ClientEvents {
 		}
 	}
 
+}
+
+class ShutDownHookThread extends Thread {
+	public void run() {
+		KeyHandler.unbindCombatKeys();
+		KeyHandler.reAddSavedKeys();
+		System.out.println("Yo, exiting thread " + Thread.currentThread().getName());
+	}
 }

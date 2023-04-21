@@ -6,16 +6,56 @@ import com.goatee.tutorial.packets.PacketRegistry;
 import com.goatee.tutorial.scripted.Player;
 import com.goatee.tutorial.scripted.PlayerStats;
 
+import JinRyuu.JRMCore.JRMCoreH;
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.PlayerTickEvent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 public class ServerEvents {
+
+	@SubscribeEvent
+	public void onEntityJoin(EntityJoinWorldEvent event) {
+		checkForDmgRed(event.entity);
+	}
+
+	private void checkForDmgRed(Entity entity) {
+		NBTTagCompound nbt;
+		if (entity instanceof EntityPlayer) {
+			nbt = entity.getEntityData().getCompoundTag("PlayerPersisted");
+			if (!nbt.hasKey("dmgred")) {
+				nbt.setFloat("dmgred", 100);
+			}
+		} else {
+			nbt = JRMCoreH.nbt(entity);
+			if (!nbt.hasKey("dmgred")) {
+				nbt.setFloat("dmgred", 100);
+			}
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void hurtEvent(LivingAttackEvent e) {
+		isSpectator(e, e.entity);
+	}
+	// LivingAttackEvent e
+
+	public void isSpectator(LivingAttackEvent e, Entity p) {
+		if (p instanceof EntityPlayer) {
+			NBTTagCompound nbt = p.getEntityData().getCompoundTag("PlayerPersisted");
+			if (!nbt.getString("ControllerName").isEmpty()) {
+				e.setCanceled(true);
+			}
+		}
+	}
 
 	@SubscribeEvent
 	public void onTick(PlayerTickEvent e) {
@@ -111,6 +151,7 @@ public class ServerEvents {
 		EntityPlayerMP p = (EntityPlayerMP) e.player;
 		UUID id = p.getUniqueID();
 		NBTTagCompound nbt = p.getEntityData().getCompoundTag("PlayerPersisted");
+		System.out.println("Sd");
 		if (nbt.getInteger("jrmcStrI") >= 2) {
 			Player.getAllPlayerStats().remove(id);
 			// ClientEvents.onGroundLT.remove(id);
@@ -160,12 +201,28 @@ public class ServerEvents {
 	}
 
 	public void removeTemps(NBTTagCompound nbt) {
+		if (nbt.getBoolean("lastFlyPacket")) {
+			nbt.setBoolean("lastFlyPacket", false);
+		}
+		if (nbt.getBoolean("lastSprintPacket")) {
+			nbt.setBoolean("lastSprintPacket", false);
+		}
+		if (nbt.getBoolean("lastMDPacket")) {
+			nbt.setBoolean("lastMDPacket", false);
+		}
+		if (nbt.getBoolean("lastMenuPacket")) {
+			nbt.setBoolean("lastMenuPacket", false);
+		}
 		if (nbt.getBoolean("CombatMode")) {
 			nbt.setBoolean("CombatMode", false);
 		}
 		if (nbt.getBoolean("isBlind")) {
 			nbt.setBoolean("isBlind", false);
 		}
+		if (!nbt.getString("ControllerName").isEmpty()) {
+			nbt.setString("ControllerName", "");
+		}
+
 	}
 
 }

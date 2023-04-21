@@ -3,7 +3,7 @@
 // (powered by FernFlower decompiler)
 //
 
-package com.goatee.tutorial.extras;
+package com.goatee.tutorial.utils;
 
 import java.util.Random;
 

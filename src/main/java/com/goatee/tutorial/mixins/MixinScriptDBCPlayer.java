@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import com.goatee.tutorial.extras.UIDodge;
 import com.goatee.tutorial.scripted.Player;
 import com.goatee.tutorial.scripted.PlayerStats;
+import com.goatee.tutorial.utils.DBCUtils;
+import com.goatee.tutorial.utils.UIDodge;
 
 import JinRyuu.JRMCore.JRMCoreH;
 import JinRyuu.JRMCore.server.JGPlayerMP;
@@ -109,9 +110,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		if (i == 1 || i == 2) {
 			JRMCoreH.Anim(i);
 		} else {
-			throw new CustomNPCsException(
-					"Invalid Animation ID : " + i + "\nValid IDs are: 1 for Flight \nand 2 for Standing",
-					new Object[0]);
+			throw new CustomNPCsException("Invalid Animation ID : " + i + "\nValid IDs are: 1 for Flight \nand 2 for Standing", new Object[0]);
 		}
 	}
 
@@ -242,11 +241,8 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 
 	@Unique
 	public String getFormName(int race, int form) {
-		CustomNPCsException c = new CustomNPCsException("Invalid \nform ID for race " + JRMCoreH.Races[race],
-				new Object[0]);
-		CustomNPCsException r = new CustomNPCsException(
-				"Invalid Race : \nValid Races are \n0 Human, 1 Saiyan\n 2 Half-Saiyan, 3 Namekian\n4 Arcosian, 5 Majin",
-				new Object[1]);
+		CustomNPCsException c = new CustomNPCsException("Invalid \nform ID for race " + JRMCoreH.Races[race], new Object[0]);
+		CustomNPCsException r = new CustomNPCsException("Invalid Race : \nValid Races are \n0 Human, 1 Saiyan\n 2 Half-Saiyan, 3 Namekian\n4 Arcosian, 5 Majin", new Object[1]);
 		if (form >= 0) {
 			if (race > 5 || race < 0) {
 				throw r;
@@ -347,21 +343,17 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 					String newvalue = Double.toString(masteryvalue);
 					switch (foundatindex) {
 					case 0:
-						newnonracial = masteryvalues[0] + "," + newvalue + ";" + masteries[1] + ";" + masteries[2] + ";"
-								+ masteries[3];
+						newnonracial = masteryvalues[0] + "," + newvalue + ";" + masteries[1] + ";" + masteries[2] + ";" + masteries[3];
 						break;
 					case 1:
-						newnonracial = masteries[0] + ";" + masteryvalues[0] + "," + newvalue + ";" + masteries[2] + ";"
-								+ masteries[3];
+						newnonracial = masteries[0] + ";" + masteryvalues[0] + "," + newvalue + ";" + masteries[2] + ";" + masteries[3];
 						break;
 					case 2:
-						newnonracial = masteries[0] + ";" + masteries[1] + ";" + masteryvalues[0] + "," + newvalue + ";"
-								+ masteries[3];
+						newnonracial = masteries[0] + ";" + masteries[1] + ";" + masteryvalues[0] + "," + newvalue + ";" + masteries[3];
 						;
 						break;
 					case 3:
-						newnonracial = masteries[0] + ";" + masteries[1] + ";" + masteries[2] + ";" + masteryvalues[0]
-								+ "," + newvalue;
+						newnonracial = masteries[0] + ";" + masteries[1] + ";" + masteries[2] + ";" + masteryvalues[0] + "," + newvalue;
 						break;
 					}
 
@@ -376,8 +368,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				if (JRMCoreH.trans[race][i].equalsIgnoreCase(formName)) {
 					state = i;
 					found = true;
-					JRMCoreH.changeFormMasteriesValue(player, amount, amountKK, add, race, state, state2, isKaiokenOn,
-							isMysticOn, isUltraInstinctOn, isGoDOn, -1);
+					JRMCoreH.changeFormMasteriesValue(player, amount, amountKK, add, race, state, state2, isKaiokenOn, isMysticOn, isUltraInstinctOn, isGoDOn, -1);
 
 				}
 
@@ -463,8 +454,7 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public void addFusionFormMasteries(ScriptPlayer<T> Controller, ScriptPlayer<T> Spectator,
-			boolean multiplyaddedStats, double multiValue, boolean addForBoth) {
+	public void addFusionFormMasteries(ScriptPlayer<T> Controller, ScriptPlayer<T> Spectator, boolean multiplyaddedStats, double multiValue, boolean addForBoth) {
 		double multi = multiValue;
 		if (multiValue == 0 || !multiplyaddedStats) {
 			multi = 1.0;
@@ -491,10 +481,12 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		String[] cnonracialmasteries = cnonracial.split(";");
 		String[] snonracialmasteries = snonracial.split(";");
 		int lengthnr = cnonracialmasteries.length;
+		int slengthnr = snonracialmasteries.length;
 
 		String[] cracialmasteries = cracial.split(";");
 		String[] sracialmasteries = sracial.split(";");
 		int lengthr = cracialmasteries.length;
+		int slengthr = sracialmasteries.length;
 
 		String newmasteriesnr = "";
 		String newmasteriesr = "";
@@ -508,64 +500,61 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 				String[] smasteryvaluesnr = snonracialmasteries[i].split(",");
 
 				// name , string( double(value1)+double(value2) ) ;
-				newmasteriesnr += cmasteryvaluesnr[0] + "," + Double.toString(
-						(Double.parseDouble(cmasteryvaluesnr[1]) + Double.parseDouble(smasteryvaluesnr[1])) * multi)
-						+ ";";
+				newmasteriesnr += cmasteryvaluesnr[0] + "," + Double.toString((Double.parseDouble(cmasteryvaluesnr[1]) + Double.parseDouble(smasteryvaluesnr[1])) * multi) + ";";
 
 			}
 			for (int i = 0; i < lengthr; i++) {
 				String[] cmasteryvaluesr = cracialmasteries[i].split(",");
 				String[] smasteryvaluesr = sracialmasteries[i].split(",");
 
-				newmasteriesr += cmasteryvaluesr[0] + "," + Double.toString(
-						(Double.parseDouble(cmasteryvaluesr[1]) + Double.parseDouble(smasteryvaluesr[1])) * multi)
-						+ ";";
+				newmasteriesr += cmasteryvaluesr[0] + "," + Double.toString((Double.parseDouble(cmasteryvaluesr[1]) + Double.parseDouble(smasteryvaluesr[1])) * multi) + ";";
 				done = true;
 			}
 
-		} else if (!samerace) {
+		} else {
 			if (multiValue == 0) {
 				multiValue = 2.0;
 			}
 			multi = multiValue;
 			for (int i = 0; i < lengthnr; i++) {
 				String[] cmasteryvaluesnr = cnonracialmasteries[i].split(",");
-				String[] smasteryvaluesnr = snonracialmasteries[i].split(",");
+				newmasteriesnr += cmasteryvaluesnr[0] + "," + Double.toString(Double.parseDouble(cmasteryvaluesnr[1]) * multi) + ";";
 
-				newmasteriesnr += cmasteryvaluesnr[0] + ","
-						+ Double.toString(Double.parseDouble(cmasteryvaluesnr[1]) * multi) + ";";
-				snewmasteriesnr += smasteryvaluesnr[0] + ","
-						+ Double.toString(Double.parseDouble(smasteryvaluesnr[1]) * multi) + ";";
 			}
 			for (int i = 0; i < lengthr; i++) {
 				String[] cmasteryvaluesr = cracialmasteries[i].split(",");
+				newmasteriesr += cmasteryvaluesr[0] + "," + Double.toString(Double.parseDouble(cmasteryvaluesr[1]) * multi) + ";";
+				done = true;
+
+			}
+
+			for (int i = 0; i < slengthnr; i++) {
+				String[] smasteryvaluesnr = snonracialmasteries[i].split(",");
+				snewmasteriesnr += smasteryvaluesnr[0] + "," + Double.toString(Double.parseDouble(smasteryvaluesnr[1]) * multi) + ";";
+			}
+			for (int i = 0; i < slengthr; i++) {
 				String[] smasteryvaluesr = snonracialmasteries[i].split(",");
-
-				newmasteriesr += cmasteryvaluesr[0] + ","
-						+ Double.toString(Double.parseDouble(cmasteryvaluesr[1]) * multi) + ";";
-
-				snewmasteriesr += smasteryvaluesr[0] + ","
-						+ Double.toString(Double.parseDouble(smasteryvaluesr[1]) * multi) + ";";
+				snewmasteriesr += smasteryvaluesr[0] + "," + Double.toString(Double.parseDouble(smasteryvaluesr[1]) * multi) + ";";
 				done = true;
 			}
 
 		}
+
 		newmasteriesnr.substring(0, lengthnr - 2);
 		cnbt.setString("jrmcFormMasteryNonRacial", newmasteriesnr);
 
 		newmasteriesr.substring(0, lengthr - 2);
 		cnbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesr);
 		if (addForBoth) {
-			snewmasteriesnr.substring(0, lengthr - 2);
-			snewmasteriesr.substring(0, lengthr - 2);
 			if (samerace) {
 				snbt.setString("jrmcFormMasteryNonRacial", newmasteriesnr);
 				snbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[crace], newmasteriesr);
 			} else {
+				snewmasteriesnr.substring(0, snonracialmasteries.length - 2);
 				snbt.setString("jrmcFormMasteryNonRacial", snewmasteriesnr);
+				snewmasteriesr.substring(0, sracialmasteries.length - 2);
 				snbt.setString("jrmcFormMasteryRacial_" + JRMCoreH.Races[srace], snewmasteriesr);
 			}
-
 		}
 
 		if (!done) {
@@ -582,12 +571,10 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 	public String[] getAllFormMasteryData(int race, int formId) {
 		ArrayList<String> data = new ArrayList<>();
 		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_MAX_LEVEL, 0));
-		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_INSTANT_TRANSFORM_UNLOCK,
-				0));
+		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_INSTANT_TRANSFORM_UNLOCK, 0));
 		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_REQUIRED_MASTERIES, 0));
 		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_AUTO_LEARN_ON_LEVEL, 0));
-		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_GAIN_TO_OTHER_MASTERIES,
-				0));
+		data.add(JGConfigDBCFormMastery.getString(race, formId, JGConfigDBCFormMastery.DATA_ID_GAIN_TO_OTHER_MASTERIES, 0));
 
 		return data.toArray(new String[0]);
 
@@ -621,4 +608,56 @@ public abstract class MixinScriptDBCPlayer<T extends EntityPlayerMP> {
 		return JRMCoreH.isFusionSpectator(player);
 	}
 
+	@Unique
+	public int getSkillLevel(String skillname) {
+		int i;
+		String[] playerskills = nbt.getString("jrmcSSlts").split(",");
+		String[] skillids = JRMCoreH.DBCSkillsIDs;
+		String[] skillnames = JRMCoreH.DBCSkillNames;
+		boolean skillFound = false;
+		boolean playerHasSkill = false;
+		for (i = 0; i < skillnames.length; i++) {
+			if (skillname.equals(skillnames[i])) {
+				skillFound = true;
+				for (int j = 0; j < playerskills.length; j++) {
+					if (playerskills[j].contains(skillids[i])) {
+						return JRMCoreH.SklLvl(i, playerskills);
+					}
+				}
+			}
+		}
+		if (!skillFound) {
+			throw new CustomNPCsException(
+					"\nInvalid Skill ID :" + skillname + ". Please re-enter the skill name \nwithout any spaces in between. \ni.e: GodOfDestruction, KiProtection, \nDefensePenetration",
+					new Object[0]);
+		}
+		if (!playerHasSkill) {
+			throw new CustomNPCsException("\nPlayer doesn't have skill " + skillname + "!", new Object[1]);
+		}
+		return 0;
+	}
+
+	@Unique
+	public int getCurrentStat(int attribute) {
+		return (int) (getMaxStat(attribute) * sdbc.getRelease() * 100F);
+	}
+
+	@Unique
+	public int getMaxStat(int attribute) {
+		return DBCUtils.getMaxStat(player, attribute);
+	}
+
+	@Unique
+	public double getCurrentFormMultiplier() {
+		double str = sdbc.getStat("str");
+		double maxstr = getFullStat(0);
+
+		return ((maxstr > str) ? maxstr : str) / str * 1.0D;
+
+	}
+
+	@Unique
+	public float getPassiveDef() {
+		return DBCUtils.getPassiveDefense(player);
+	}
 }

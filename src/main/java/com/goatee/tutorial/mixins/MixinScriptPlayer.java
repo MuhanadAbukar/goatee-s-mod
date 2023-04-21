@@ -1,6 +1,7 @@
 package com.goatee.tutorial.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import com.goatee.tutorial.scripted.Player;
@@ -118,8 +119,7 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	}
 
 	@Unique
-	public void addPotionEffect(int effect, int effect2, int effect3, int effect4, int duration, int strength,
-			boolean hideParticles) {
+	public void addPotionEffect(int effect, int effect2, int effect3, int effect4, int duration, int strength, boolean hideParticles) {
 		if (effect < 0 || effect >= Potion.potionTypes.length || Potion.potionTypes[effect] == null)
 			return;
 
@@ -167,6 +167,7 @@ public abstract class MixinScriptPlayer<T extends EntityPlayerMP> {
 	public boolean inAir() {
 		return !player.onGround;
 	}
+
 	@Unique
 	public void disableMenu(boolean bo) {
 		nbt.setBoolean("isMenuDisabled", bo);

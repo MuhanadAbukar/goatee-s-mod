@@ -1,5 +1,6 @@
 package com.goatee.tutorial.proxy;
 
+import com.goatee.tutorial.options;
 import com.goatee.tutorial.CombatMode.KeyHandler;
 import com.goatee.tutorial.Events.ClientEvents;
 
@@ -15,12 +16,14 @@ public class ClientProxy extends CommonProxy {
 		super.preInit(e);
 		FMLCommonHandler.instance().bus().register(new ClientEvents());
 		MinecraftForge.EVENT_BUS.register(new ClientEvents());
-		
+
 	}
 
 	public void init(FMLInitializationEvent e) {
 		super.init(e);
 		KeyHandler.registerKeys();
+		options.loadOptions();
+//
 	}
 
 	public void postInit(FMLPostInitializationEvent e) {

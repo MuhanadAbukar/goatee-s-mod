@@ -22,15 +22,14 @@ public class LateMixinLoader implements ILateMixinLoader {
 	}
 
 	/**
-	 * @param loadedMods Set of loaded modids, for use in discrimination of what
-	 *                   mixins load
+	 * @param loadedMods Set of loaded modids, for use in discrimination of what mixins load
 	 * @return mixin configurations to be queued and sent to Mixin library.
 	 */
 	@Override
 	public List<String> getMixins(Set<String> loadedMods) {
 		List<String> toLoad = new ArrayList<>();
-		String[] CommonMixins = { "MixinIDBCPlayer", "MixinIPlayer", "MixinJRMCoreH", "MixinScriptDBCPlayer",
-				"MixinScriptPlayer" };
+		String[] CommonMixins = { "MixinIDBCPlayer", "MixinIPlayer", "MixinScriptDBCPlayer", "MixinScriptPlayer", "MixinJRMCoreEHcorrect", "MixinJRMCoreH", "MixinScriptEntity", "MixinDBCKiTech",
+				"MixinEntityEnergyAtt" }; // ,
 		String[] ClientMixins = {};
 		String[] ServerMixins = {};
 		Collections.addAll(toLoad, CommonMixins);

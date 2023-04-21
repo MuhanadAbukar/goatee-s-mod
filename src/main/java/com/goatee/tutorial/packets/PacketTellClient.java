@@ -58,6 +58,7 @@ public class PacketTellClient implements IMessageHandler<PacketTellClient.msg, I
 					ClientEvents.isMenuDisabled = true;
 				} else {
 					ClientEvents.isMenuDisabled = false;
+					ClientEvents.closeScreen = false;
 				}
 			}
 			if (idString.startsWith("isMovementDisabled:")) {
